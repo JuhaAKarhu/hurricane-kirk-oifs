@@ -43,16 +43,24 @@ def download(force=False):
 def verify_kirk(ibtracs_path=None):
     """Verify that Kirk 2024 is in the IBTrACS file."""
     import xarray as xr
+    import numpy as np
 
     path = ibtracs_path or DEST_FILE
-    ds = xr.open_dataset(path)
+    ds = xr.open_dataset(path, engine='netcdf4')
 
-    y2024 = ds.where(ds.season == 2024, drop=True)
-    names = [n.tobytes().strip(b'\x00').decode('ascii', errors='ignore')
-             for n in y2024.name.values]
+    # season is per-storm; select storm indices for 2024
+    season_vals = ds.season.values  # shape (storm,)
+    idx_2024 = np.where(season_vals == 2024)[0]
+
+    # name has shape (storm, char); decode each
+    name_arr = ds.name.values  # bytes array
+    def _decode(row):
+        return b''.join(row).strip(b'\x00 ').decode('ascii', errors='ignore').upper()
+
+    names = [_decode(name_arr[i]) for i in idx_2024]
     print(f'2024 NA storms in IBTrACS ({len(names)}): {names}')
 
-    if b'KIRK' in [n if isinstance(n, bytes) else n.encode() for n in y2024.name.values]:
+    if 'KIRK' in names:
         print('✅ KIRK found in IBTrACS 2024 season')
     else:
         print('⚠️  KIRK not yet in this version of IBTrACS')
