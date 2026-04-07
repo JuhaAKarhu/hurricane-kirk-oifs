@@ -1,0 +1,36 @@
+# Large data files - never commit GRIB/NetCDF data to git
+*.grib
+*.grib2
+*.grb
+*.nc
+*.h5
+*.hdf
+data/
+plots/*.png
+plots/*.pdf
+plots/*.svg
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.eggs/
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
+
+# Editor
+*.swp
+*~
+.vscode/
+
+# System
+.DS_Store
+
+# IBTrACS data (large)
+IBTrACS*
+
+# Ribberink subdir is tracked as-is (small jupyter notebooks)
+# ribberink_code/ - keep in git

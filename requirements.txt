@@ -1,0 +1,7 @@
+haversine>=1.4.0
+matplotlib>=3.7.0
+cartopy>=0.21.0
+scipy>=1.11.0
+jupyter>=1.0.0
+notebook>=7.0.0
+# cfgrib, xarray, eccodes, pandas, numpy already in run_oifs .venv
