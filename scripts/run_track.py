@@ -85,6 +85,87 @@ def load_kirk_best_track():
     return best_track
 
 
+def _angular_lon_distance(lon_vals, lon0):
+    """Return shortest signed distance (deg) between lon_vals and lon0."""
+    return ((lon_vals - lon0 + 180.0) % 360.0) - 180.0
+
+
+def local_storm_tracker(msl_ds, best_track, s_size=4.0):
+    """Track storm center by minimum MSL in a moving search box.
+
+    This mirrors the Ribberink logic but avoids xarray compatibility
+    issues in the original helper functions.
+    """
+    da = msl_ds.msl
+    use_360 = float(da.lon.max()) > 180.0
+
+    bt_time = pd.to_datetime(best_track.time.values)
+    bt_lat = best_track.lat.values.astype(float)
+    bt_lon = best_track.lon.values.astype(float)
+    if use_360:
+        bt_lon = bt_lon % 360.0
+
+    times = pd.to_datetime(da.time.values)
+    enter = max(times[0], bt_time[0])
+    idx_enter = int(np.searchsorted(times, enter))
+
+    recs = []
+    guess_lat = float(bt_lat[int(np.searchsorted(bt_time, enter))])
+    guess_lon = float(bt_lon[int(np.searchsorted(bt_time, enter))])
+
+    for ti in range(idx_enter, len(times)):
+        frame = da.isel(time=ti)
+        lat = frame.lat
+        lon = frame.lon
+
+        lat_mask = np.abs(lat - guess_lat) <= s_size
+        if use_360:
+            lon_mask = np.abs(_angular_lon_distance(lon, guess_lon)) <= s_size
+        else:
+            lon_mask = np.abs(lon - guess_lon) <= s_size
+
+        box = frame.where(lat_mask & lon_mask, drop=True)
+        if box.size == 0:
+            # Fallback: expand search box once, then use domain-wide minimum.
+            lat_mask2 = np.abs(lat - guess_lat) <= (2.0 * s_size)
+            if use_360:
+                lon_mask2 = np.abs(_angular_lon_distance(lon, guess_lon)) <= (2.0 * s_size)
+            else:
+                lon_mask2 = np.abs(lon - guess_lon) <= (2.0 * s_size)
+            box = frame.where(lat_mask2 & lon_mask2, drop=True)
+            if box.size == 0:
+                box = frame
+
+        df = box.to_dataframe(name='msl').dropna().reset_index()
+        if df.empty:
+            continue
+
+        msl_min = df['msl'].min()
+        cand = df[df['msl'] == msl_min].copy()
+        if use_360:
+            dlon = _angular_lon_distance(cand['lon'].to_numpy(), guess_lon)
+        else:
+            dlon = cand['lon'].to_numpy() - guess_lon
+        d = (cand['lat'].to_numpy() - guess_lat) ** 2 + dlon ** 2
+        k = int(np.argmin(d))
+        row = cand.iloc[k]
+
+        guess_lat = float(row['lat'])
+        guess_lon = float(row['lon'])
+        out_lon = ((guess_lon + 180.0) % 360.0) - 180.0 if use_360 else guess_lon
+
+        recs.append({
+            'time': pd.to_datetime(row['time']),
+            'lat': guess_lat,
+            'lon': out_lon,
+            'msl': float(row['msl']),
+        })
+
+    if not recs:
+        raise RuntimeError('Local tracker produced no points')
+    return pd.DataFrame(recs)
+
+
 def compute_track(run_name, oifs_run, best_track):
     """
     Run storm_tracker on a single OIFSRun and return track DataFrame.
@@ -105,7 +186,7 @@ def compute_track(run_name, oifs_run, best_track):
     if float(msl_ds.lon.max()) > 180 and float(bt.lon.min()) < 0:
         bt['lon'] = (bt.lon % 360)
 
-    track_df = hf.storm_tracker(msl_ds, bt, model='OPER', s_size=4)
+    track_df = local_storm_tracker(msl_ds, bt, s_size=4)
     print(f'  Track computed: {len(track_df)} timesteps')
     return track_df
 
