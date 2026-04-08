@@ -48,6 +48,11 @@ BEST_TRACK_PICKLE = os.path.join(
 TRACK_DIR = os.path.join(os.path.dirname(__file__), '..', 'plots', 'tracks')
 
 
+def run_name_to_safe(run_name):
+    """Encode run names for file paths (+3K -> p3K, -3K -> m3K)."""
+    return run_name.replace('+', 'p').replace('-', 'm')
+
+
 def load_kirk_best_track():
     """Load Kirk 2024 best track (pickle first, IBTrACS fallback)."""
     if os.path.exists(BEST_TRACK_PICKLE):
@@ -208,7 +213,7 @@ def track_df_to_xarray(track_df, run_name):
 def save_track(ds, run_name):
     """Save track to NetCDF."""
     os.makedirs(TRACK_DIR, exist_ok=True)
-    out_path = os.path.join(TRACK_DIR, f'track_{run_name.replace("+", "p")}.nc')
+    out_path = os.path.join(TRACK_DIR, f'track_{run_name_to_safe(run_name)}.nc')
     ds.to_netcdf(out_path)
     print(f'  Saved: {out_path}')
     return out_path

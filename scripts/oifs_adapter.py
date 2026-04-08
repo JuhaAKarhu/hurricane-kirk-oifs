@@ -4,7 +4,7 @@ oifs_adapter.py
 Reads OpenIFS GRIB output files and returns xarray Datasets in a format
 compatible with Ribberink et al. (2025) hurricane analysis functions.
 
-OIFS file types (per timestep, e.g. +000012 = 12 h forecast):
+OIFS file types (per timestep, e.g. +000012 = 12 model steps):
   ICMGGac3u+XXXXXX  – surface fields: msl, 10u, 10v, tp, sst
   ICMSHac3u+XXXXXX  – pressure-level fields: u, v, t, z, r, w, vo
   ICMUAac3u+XXXXXX  – pressure-level fields: q, pv
@@ -38,9 +38,12 @@ INIT_DATETIME = pd.Timestamp('2024-10-03 06:00:00')
 
 
 def _step_to_timedelta(step_str):
-    """Convert '+XXXXXX' step string (hours) to timedelta."""
-    hours = int(step_str.lstrip('+'))
-    return pd.Timedelta(hours=hours)
+    """Convert '+XXXXXX' model-step string to timedelta.
+
+    For these Kirk runs, one model step is 15 minutes, so +000012 = 3 hours.
+    """
+    nsteps = int(step_str.lstrip('+'))
+    return pd.Timedelta(minutes=15 * nsteps)
 
 
 def _list_grib_files(run_dir, prefix):
@@ -63,7 +66,15 @@ def _read_surface_field(filepath, shortname):
     ds_list = cfgrib.open_datasets(filepath, backend_kwargs={'indexpath': ''})
     for ds in ds_list:
         if shortname in ds:
-            return ds[[shortname]].rename({'latitude': 'lat', 'longitude': 'lon'})
+            out = ds[[shortname]]
+            rename_map = {}
+            if 'latitude' in out.dims or 'latitude' in out.coords:
+                rename_map['latitude'] = 'lat'
+            if 'longitude' in out.dims or 'longitude' in out.coords:
+                rename_map['longitude'] = 'lon'
+            if rename_map:
+                out = out.rename(rename_map)
+            return out
     raise KeyError(f"'{shortname}' not found in {filepath}")
 
 
@@ -72,7 +83,21 @@ def _read_pressure_field(filepath, shortname, levels=None):
     ds_list = cfgrib.open_datasets(filepath, backend_kwargs={'indexpath': ''})
     for ds in ds_list:
         if shortname in ds:
-            out = ds[[shortname]].rename({'latitude': 'lat', 'longitude': 'lon'})
+            out = ds[[shortname]]
+            rename_map = {}
+            if 'latitude' in out.dims or 'latitude' in out.coords:
+                rename_map['latitude'] = 'lat'
+            if 'longitude' in out.dims or 'longitude' in out.coords:
+                rename_map['longitude'] = 'lon'
+            if rename_map:
+                out = out.rename(rename_map)
+
+            # Pressure-level data must carry a vertical coordinate.
+            # Some cfgrib groups can expose the same shortName on a flattened
+            # "values" dimension; skip those when levels are requested.
+            if levels is not None and ('isobaricInhPa' not in out.dims and 'level' not in out.dims):
+                continue
+
             if 'isobaricInhPa' in out.dims:
                 out = out.rename({'isobaricInhPa': 'level'})
             if levels is not None:
@@ -209,7 +234,7 @@ RUNS = {
     'baserun': os.path.join(MAHTI_BASE, 'int_exp_1003'),
     '+3K':     os.path.join(MAHTI_BASE, '3k_run'),
     '+6K':     os.path.join(MAHTI_BASE, '6k_run'),
-    # '-3K':   os.path.join(MAHTI_BASE, 'PLACEHOLDER'),  # add when available
+    '-3K':     os.path.join(MAHTI_BASE, 'minus_3k_run'),
 }
 
 
