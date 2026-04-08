@@ -36,10 +36,12 @@ def _dist_broadcast_safe(a, b):
 # Patch Ribberink helper for compatibility with newer xarray versions.
 hf.dist = _dist_broadcast_safe
 
-# Path to IBTrACS file
-IBTRACS_PATH = os.path.join(
-    os.path.dirname(__file__), '..', 'data', 'IBTrACS.NA.v04r00.nc'
-)
+# Preferred IBTrACS files, newest first.
+IBTRACS_PATHS = [
+    os.path.join(os.path.dirname(__file__), '..', 'data', 'IBTrACS.ALL.v04r01.nc'),
+    os.path.join(os.path.dirname(__file__), '..', 'data', 'IBTrACS.NA.v04r01.nc'),
+    os.path.join(os.path.dirname(__file__), '..', 'data', 'IBTrACS.NA.v04r00.nc'),
+]
 BEST_TRACK_PICKLE = os.path.join(
     os.path.dirname(__file__), '..', 'data', 'kirk_best_track.pickle'
 )
@@ -53,8 +55,69 @@ def run_name_to_safe(run_name):
     return run_name.replace('+', 'p').replace('-', 'm')
 
 
+def _decode_storm_name(raw_name):
+    if isinstance(raw_name, (bytes, np.bytes_)):
+        return raw_name.decode().strip()
+    return str(raw_name).strip()
+
+
+def _load_best_track_from_ibtracs_file(path, storm_name='KIRK', season=2024):
+    """Load a best track directly from an IBTrACS NetCDF file."""
+    ds = xr.open_dataset(path)
+    names = ds['name'].values
+    seasons = ds['season'].values
+
+    matches = [
+        i for i, raw in enumerate(names)
+        if _decode_storm_name(raw).upper() == storm_name.upper() and int(seasons[i]) == season
+    ]
+    if not matches:
+        raise ValueError(f'{storm_name} ({season}) not found in {path}')
+
+    storm = ds.isel(storm=matches[0])
+    times = pd.to_datetime(storm['time'].values).round('min')
+    lat = storm['lat'].values.astype(float)
+    lon = storm['lon'].values.astype(float)
+
+    pres = None
+    for var in ['usa_pres', 'wmo_pres']:
+        if var in storm:
+            arr = storm[var].values.astype(float)
+            if pres is None:
+                pres = arr
+            else:
+                pres = np.where(np.isnan(pres), arr, pres)
+    if pres is None:
+        pres = np.full_like(lat, np.nan, dtype=float)
+
+    valid = (~pd.isna(times)) & (~np.isnan(lat)) & (~np.isnan(lon))
+    out = xr.Dataset(
+        data_vars={
+            'lat': ('time', lat[valid]),
+            'lon': ('time', lon[valid]),
+            'min_pres': ('time', pres[valid]),
+        },
+        coords={'time': times[valid]},
+    )
+    out.attrs['source'] = path
+    return out
+
+
 def load_kirk_best_track():
-    """Load Kirk 2024 best track (pickle first, IBTrACS fallback)."""
+    """Load Kirk 2024 best track, preferring IBTrACS v04r01 NetCDF."""
+    for path in IBTRACS_PATHS:
+        if not os.path.exists(path):
+            continue
+        try:
+            best_track = _load_best_track_from_ibtracs_file(path, storm_name='KIRK', season=2024)
+            print(
+                f'Best track loaded from IBTrACS: {best_track.sizes["time"]} timesteps, '
+                f'{pd.to_datetime(best_track.time.values[0])} -> {pd.to_datetime(best_track.time.values[-1])}'
+            )
+            return best_track
+        except Exception:
+            continue
+
     if os.path.exists(BEST_TRACK_PICKLE):
         with open(BEST_TRACK_PICKLE, 'rb') as f:
             bt = pickle.load(f)
@@ -66,28 +129,15 @@ def load_kirk_best_track():
         })
         best_track = xr.Dataset.from_dataframe(bt_df).set_index(index='time').rename(index='time')
         print(
-            f'Best track loaded from pickle: {best_track.sizes["time"]} timesteps, '
+            f'Best track loaded from pickle fallback: {best_track.sizes["time"]} timesteps, '
             f'{pd.to_datetime(best_track.time.values[0])} -> {pd.to_datetime(best_track.time.values[-1])}'
         )
         return best_track
 
-    if not os.path.exists(IBTRACS_PATH):
-        raise FileNotFoundError(
-            f'Best-track file not found: {BEST_TRACK_PICKLE} and {IBTRACS_PATH}\n'
-            'Run: python scripts/download_ibtracs.py'
-        )
-
-    orig_dir = os.getcwd()
-    os.chdir(os.path.dirname(IBTRACS_PATH))
-    try:
-        best_track = hf.import_ibtracs(hurr_year=2024, storm_name=b'KIRK')
-    finally:
-        os.chdir(orig_dir)
-    print(
-        f'Best track loaded from IBTrACS: {len(best_track.time)} timesteps, '
-        f'{best_track.time.values[0]} -> {best_track.time.values[-1]}'
+    raise FileNotFoundError(
+        'No usable best-track source found. Expected one of: '\
+        + ', '.join(IBTRACS_PATHS + [BEST_TRACK_PICKLE])
     )
-    return best_track
 
 
 def _angular_lon_distance(lon_vals, lon0):

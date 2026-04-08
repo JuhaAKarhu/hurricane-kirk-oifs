@@ -107,12 +107,16 @@ def main() -> None:
     os.makedirs(os.path.dirname(args.output), exist_ok=True)
 
     plt.figure(figsize=(10, 8))
+    all_track_times = []
 
     for path in files:
         ds = xr.open_dataset(path)
         if "lon" not in ds or "lat" not in ds:
             print(f"Skipping {path}: missing lon/lat")
             continue
+
+        if "time" in ds:
+            all_track_times.extend(pd.to_datetime(ds["time"].values))
 
         label = label_from_filename(path)
         plt.plot(ds["lon"], ds["lat"], marker="o", markersize=2, linewidth=1.5,
@@ -160,8 +164,15 @@ def main() -> None:
 
     if not args.no_best_track:
         best_track = load_kirk_best_track()
-        bt_lon = ((best_track.lon.values.astype(float) + 180.0) % 360.0) - 180.0
-        bt_lat = best_track.lat.values.astype(float)
+        bt = best_track.copy()
+        if all_track_times:
+            tmin = min(all_track_times)
+            tmax = max(all_track_times)
+            bt = bt.sel(time=slice(tmin, tmax))
+
+        bt_times = pd.to_datetime(bt.time.values)
+        bt_lon = ((bt.lon.values.astype(float) + 180.0) % 360.0) - 180.0
+        bt_lat = bt.lat.values.astype(float)
         plt.plot(
             bt_lon,
             bt_lat,
@@ -169,21 +180,40 @@ def main() -> None:
             linewidth=2.2,
             color="black",
             marker="x",
-            markersize=6,
+            markersize=4,
             label="Best track (archive)",
             zorder=10,
         )
 
-        # Add date labels for best-track timesteps (00UTC intervals)
-        if "time" in best_track:
-            times = pd.to_datetime(best_track.time.values)
-            for i, t in enumerate(times):
-                if t.hour == 0 or i == 0:
-                    date_str = t.strftime("%m-%d")
-                    plt.annotate(date_str, (bt_lon[i], bt_lat[i]),
-                                xytext=(3, -8), textcoords="offset points",
-                                fontsize=7, alpha=0.8, color="black",
-                                fontweight="bold")
+        bt_label_idx = pick_daily_label_indices(bt_times, target_hour=args.label_hour)
+        for i in bt_label_idx:
+            t = bt_times[i]
+            plt.scatter(
+                bt_lon[i],
+                bt_lat[i],
+                s=58,
+                marker="x",
+                color="black",
+                linewidths=1.3,
+                zorder=11,
+            )
+            date_str = t.strftime("%m-%d")
+            plt.annotate(
+                date_str,
+                (bt_lon[i], bt_lat[i]),
+                xytext=(3, -8),
+                textcoords="offset points",
+                fontsize=7,
+                alpha=0.9,
+                color="black",
+                fontweight="bold",
+            )
+
+            if args.print_labeled_points:
+                print(
+                    f"[best-track] label {date_str} at {t.strftime('%Y-%m-%d %H:%M')} "
+                    f"-> lon={bt_lon[i]:.2f}, lat={bt_lat[i]:.2f}"
+                )
 
     plt.title("Hurricane Kirk OIFS Track Comparison with Timesteps")
     plt.xlabel("Longitude (deg)")
