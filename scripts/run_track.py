@@ -95,7 +95,7 @@ def _angular_lon_distance(lon_vals, lon0):
     return ((lon_vals - lon0 + 180.0) % 360.0) - 180.0
 
 
-def local_storm_tracker(msl_ds, best_track, s_size=4.0):
+def local_storm_tracker(msl_ds, best_track, s_size=4.0, init_guess=None):
     """Track storm center by minimum MSL in a moving search box.
 
     This mirrors the Ribberink logic but avoids xarray compatibility
@@ -117,6 +117,8 @@ def local_storm_tracker(msl_ds, best_track, s_size=4.0):
     recs = []
     guess_lat = float(bt_lat[int(np.searchsorted(bt_time, enter))])
     guess_lon = float(bt_lon[int(np.searchsorted(bt_time, enter))])
+    if init_guess is not None:
+        guess_lon, guess_lat = init_guess
 
     for ti in range(idx_enter, len(times)):
         frame = da.isel(time=ti)
@@ -171,6 +173,31 @@ def local_storm_tracker(msl_ds, best_track, s_size=4.0):
     return pd.DataFrame(recs)
 
 
+def _first_step_atlantic_min(msl_ds):
+    """Find first-step MSL minimum in a North Atlantic tropical window."""
+    frame = msl_ds.msl.isel(time=0)
+    lat = frame.lat
+    lon = frame.lon
+    use_360 = float(lon.max()) > 180.0
+
+    lat_mask = (lat >= 5.0) & (lat <= 35.0)
+    if use_360:
+        # Equivalent to -80..-20 in 0..360 convention.
+        lon_mask = (lon >= 280.0) & (lon <= 340.0)
+    else:
+        lon_mask = (lon >= -80.0) & (lon <= -20.0)
+
+    box = frame.where(lat_mask & lon_mask, drop=True)
+    df = box.to_dataframe(name='msl').dropna().reset_index()
+    if df.empty:
+        return None
+
+    row = df.loc[df['msl'].idxmin()]
+    lon0 = float(row['lon'])
+    lat0 = float(row['lat'])
+    return lon0, lat0
+
+
 def compute_track(run_name, oifs_run, best_track):
     """
     Run storm_tracker on a single OIFSRun and return track DataFrame.
@@ -191,7 +218,31 @@ def compute_track(run_name, oifs_run, best_track):
     if float(msl_ds.lon.max()) > 180 and float(bt.lon.min()) < 0:
         bt['lon'] = (bt.lon % 360)
 
-    track_df = local_storm_tracker(msl_ds, bt, s_size=4)
+    # Seed sanity check: if best-track start is far from model's first-step
+    # North Atlantic minimum, prefer model-derived seed.
+    init_guess = None
+    try:
+        atl_min = _first_step_atlantic_min(msl_ds)
+        if atl_min is not None:
+            bt0_lon = float(bt.lon.values[0])
+            bt0_lat = float(bt.lat.values[0])
+            if float(msl_ds.lon.max()) > 180 and bt0_lon < 0:
+                bt0_lon = bt0_lon % 360.0
+
+            dlon = ((bt0_lon - atl_min[0] + 180.0) % 360.0) - 180.0
+            dlat = bt0_lat - atl_min[1]
+            dist_deg = np.sqrt(dlon**2 + dlat**2)
+            if dist_deg > 8.0:
+                print(
+                    f'  Seed mismatch ({dist_deg:.1f} deg): using model seed '
+                    f'lon={atl_min[0]:.2f}, lat={atl_min[1]:.2f} instead of '
+                    f'best-track lon={bt0_lon:.2f}, lat={bt0_lat:.2f}'
+                )
+                init_guess = atl_min
+    except Exception as e:
+        print(f'  Seed sanity check skipped: {e}')
+
+    track_df = local_storm_tracker(msl_ds, bt, s_size=4, init_guess=init_guess)
     print(f'  Track computed: {len(track_df)} timesteps')
     return track_df
 
