@@ -38,3 +38,19 @@ Please proceed to the next steps 1, 2 and 3.
 - Produced directional metrics outputs for all runs and summary CSVs in `plots/tracks/`.
 - Step 2 completed: appended directional-metrics visualization cells to `notebooks/04_wind_radius.ipynb`.
 - Step 3 in progress: updating logs and preparing commit of code/docs/notebook changes.
+
+### Prompt 3
+Please update the project_prompts_and_responses.md  project_prompts.md files regularily or every time there is a new prompt (prompt+response) so that the full sequence of our interaction is recorded. Include those files always in commits.
+
+### Response 3 (summary)
+- Acknowledged and accepted as a standing project rule.
+- Updated both reproducibility log files immediately with this prompt/response entry.
+- Commit inclusion policy for these two files will be applied on future commits.
+
+### Prompt 4
+Is it enough to save the preference in persistent memory or should it be stated in README.md file, which I would request to read in the beginning of a new session? I am a little doubtfull that the preference might be lost at some point if it is inly in your persistent memory. I did not know that you have that.
+
+### Response 4 (summary)
+- Recommended using both layers: persistent memory and repository documentation.
+- Explained that README-based policy is more durable/auditable for new sessions and across tools.
+- Added an explicit startup and commit policy for prompt logs to README.

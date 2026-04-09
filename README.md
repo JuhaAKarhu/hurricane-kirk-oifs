@@ -91,6 +91,11 @@ To support prompt-level reproducibility, this repository now tracks:
 - `project_prompts.md` (user prompts only)
 - `project_prompts_and_responses.md` (prompt + response summaries)
 
+Session/commit policy:
+- At the beginning of a new session, first read both log files and continue numbering from the latest entry.
+- After each new user prompt, append entries to both files (prompt-only and prompt+response summary).
+- Include both log files in every commit where they changed.
+
 Current note:
 - Prior-session prompts were not found in this workspace, so logging starts from the first recorded entry in these files.
 
