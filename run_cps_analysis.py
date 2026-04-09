@@ -1,6 +1,8 @@
 import sys, os
-sys.path.insert(0, '../scripts')
-sys.path.insert(0, '../ribberink_code')
+# Resolve paths relative to this script's own directory
+_HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(_HERE, 'scripts'))
+sys.path.insert(0, os.path.join(_HERE, 'ribberink_code'))
 
 import numpy as np
 import xarray as xr
@@ -8,7 +10,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-from oifs_adapter import RUNS, OIFSRun
+from oifs_adapter import RUNS, OIFSRun, gridded_z_dir
 import hurricane_functions as hf
 
 
@@ -19,7 +21,7 @@ def run_name_to_safe(run_name):
 tracks = {}
 for run_name in RUNS:
     safe_name = run_name_to_safe(run_name)
-    path = f'../plots/tracks/track_{safe_name}.nc'
+    path = os.path.join(_HERE, f'plots/tracks/track_{safe_name}.nc')
     if os.path.exists(path):
         tracks[run_name] = xr.open_dataset(path)
         print(f'Loaded track: {run_name} ({len(tracks[run_name].time)} timesteps)')
@@ -38,22 +40,33 @@ for run_name, run_dir in RUNS.items():
     track_ds = tracks[run_name]
 
     # Load geopotential height at 300, 600, 900 hPa (z/g, in metres)
-    zg_ds = oifs_run.get_geopotential_height(levels=(300, 600, 900))
-
-    zg_300 = zg_ds.sel(level=300).drop_vars('level')
-    zg_600 = zg_ds.sel(level=600).drop_vars('level')
-    zg_900 = zg_ds.sel(level=900).drop_vars('level')
-
-    # Ribberink hart() needs variable named after the level for OPER, or
-    # we can pass renamed datasets. Here we pass geopotential height datasets
-    # The Hart function computes halves based on storm direction and radius.
-    # N=2 means 2-timestep (24h at 12h freq) convolution window.
-    B_u, VT_u, B_c_u, VT_c_u, halves_u = hf.hart(
-        zg_300, zg_600, track_ds, model='OPER', hemisphere='North', N=2
+    # Uses pre-converted gridded GRIB files (see scripts/convert_spectral_to_grid.sh)
+    zg_ds = oifs_run.get_geopotential_height(
+        levels=(300, 600, 900),
+        gridded_z_dir=gridded_z_dir(run_name)
     )
-    B_l, VT_l, B_c_l, VT_c_l, halves_l = hf.hart(
-        zg_600, zg_900, track_ds, model='OPER', hemisphere='North', N=2
-    )
+
+    # hart() arithmetic (B/VT stored in numpy float arrays) requires DataArrays,
+    # not Datasets. Extract the 'zg' DataArray per level, keeping the scalar
+    # 'level' coordinate so that hart()'s OPER branch can read press_u/l.
+    zg_300 = zg_ds['zg'].sel(level=300)
+    zg_600 = zg_ds['zg'].sel(level=600)
+    zg_900 = zg_ds['zg'].sel(level=900)
+
+    # N=2 means 2-timestep convolution window.
+    try:
+        B_u, VT_u, B_c_u, VT_c_u, halves_u = hf.hart(
+            zg_300, zg_600, track_ds, model='OPER', hemisphere='North', N=2
+        )
+        B_l, VT_l, B_c_l, VT_c_l, halves_l = hf.hart(
+            zg_600, zg_900, track_ds, model='OPER', hemisphere='North', N=2
+        )
+    except Exception as e:
+        print(f'  ERROR calling hart(): {type(e).__name__}: {e}')
+        import traceback
+        traceback.print_exc()
+        print(f'  Skipping {run_name}')
+        continue
 
     cps_results[run_name] = {
         'B': B_u, 'B_c': B_c_u,
@@ -61,8 +74,8 @@ for run_name, run_dir in RUNS.items():
         'VT_lower': VT_l, 'VT_lower_c': VT_c_l,
         'times': track_ds.time.values[:-1]  # hart returns n-1 values
     }
-    print(f'  B range: {B_u.min():.1f} to {B_u.max():.1f}')
-    print(f'  V_T^U range: {VT_u.min():.1f} to {VT_u.max():.1f}')
+    print(f'  B_u range: [{np.nanmin(B_u):.1f}, {np.nanmax(B_u):.1f}], NaN count: {np.isnan(B_u).sum()}/{len(B_u)}')
+    print(f'  VT_u range: [{np.nanmin(VT_u):.1f}, {np.nanmax(VT_u):.1f}], NaN count: {np.isnan(VT_u).sum()}/{len(VT_u)}')
 
 colors = {'baserun': '#1f77b4', '+3K': '#d62728', '+6K': '#ff7f0e', '-3K': '#2ca02c'}
 
@@ -72,12 +85,23 @@ for ax_idx, (ax, vt_key, title) in enumerate([
     (axes[0], 'VT_upper_c', 'Upper CPS (300–600 hPa)'),
     (axes[1], 'VT_lower_c', 'Lower CPS (600–900 hPa)'),
 ]):
+    plot_count = 0
     for run_name, res in cps_results.items():
-        sc = ax.scatter(res['B_c'], res[vt_key],
-                        c=colors.get(run_name, 'k'),
-                        label=run_name, s=30, alpha=0.8, zorder=3)
-        ax.plot(res['B_c'], res[vt_key],
-                color=colors.get(run_name, 'k'), alpha=0.4, lw=1)
+        b_vals = res['B_c']
+        vt_vals = res[vt_key]
+        # Only plot non-NaN points
+        valid_mask = ~(np.isnan(b_vals) | np.isnan(vt_vals))
+        if valid_mask.sum() > 0:
+            sc = ax.scatter(b_vals[valid_mask], vt_vals[valid_mask],
+                            c=colors.get(run_name, 'k'),
+                            label=run_name, s=30, alpha=0.8, zorder=3)
+            ax.plot(b_vals[valid_mask], vt_vals[valid_mask],
+                    color=colors.get(run_name, 'k'), alpha=0.4, lw=1)
+            plot_count += valid_mask.sum()
+        else:
+            print(f'WARNING: No valid CPS points for {run_name} on {vt_key}')
+
+    print(f'\nPlotted {plot_count} total points on {title}')
 
     ax.axhline(0, color='k', lw=0.8, ls='--')
     ax.axvline(0, color='k', lw=0.8, ls='--')
@@ -97,6 +121,6 @@ for ax_idx, (ax, vt_key, title) in enumerate([
 
 plt.suptitle('Hurricane Kirk 2024 – Cyclone Phase Space', fontsize=13)
 plt.tight_layout()
-plt.savefig('../plots/kirk_cps.png', dpi=150)
+plt.savefig(os.path.join(_HERE, 'plots/kirk_cps.png'), dpi=150)
 plt.show()
-print('Saved: ../plots/kirk_cps.png')
+print('Saved: plots/kirk_cps.png')

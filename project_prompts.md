@@ -41,3 +41,29 @@ This possibly happened because the computing node session in Mahti was terminate
 9. "Run all four steps."
 
 10. "Committ changes and push! lets wrap up for today."
+
+## 2026-04-09 (new session)
+
+11. "Check  /users/jfkarhu/Numlab/hurricane_kirk/README.md for the project status and let's continue from there!"
+
+12. "Lets start taking the suggested steps in order!"
+
+13. "Check 'hurricane_funcs.py' in Ribberink codebase for 'magnitude' function and other missing functions!"
+
+14. "The process seems stalled."
+
+15. "The CPS figure exists, but there are no graphs/lines/markers/dots ie. content in the plot, just two frames for lower and upper CPSs."
+
+13. "Check \"hurricane_funcs.py\" in Ribberink codebase for \"magnitude\" function and other missing functions!"
+
+## 2026-04-09 (continued session)
+
+16. "Pursue option 2 now!"
+
+17. "The output files for each runs: baserun: pwd"
+
+18. "Are you sure the spectral file conversion was successful? You might want to check /users/jfkarhu/Numlab/run_oifs/post_process_oifs_python.bash for hints!"
+
+## 2026-04-10
+
+19. "I need to interrupt the process now for the day. Make necessary remarks on README.md so that you know where we stopped this time so that a smooth restart can happen tomorrow. Commit all changes and push!"
