@@ -18,6 +18,8 @@ import sys
 import pandas as pd
 import matplotlib.pyplot as plt
 import xarray as xr
+from matplotlib.lines import Line2D
+from matplotlib.legend_handler import HandlerTuple
 
 sys.path.insert(0, os.path.dirname(__file__))
 
@@ -108,6 +110,19 @@ def main() -> None:
 
     plt.figure(figsize=(10, 8))
     all_track_times = []
+    run_legend_items = []
+    title_fs = 24
+    axis_label_fs = 22
+    tick_fs = 18
+    annot_fs = 14
+    legend_fs = 18
+    legend_title_fs = 20
+    track_colors = {
+        "-3K": "tab:blue",
+        "baserun": "tab:green",
+        "+3K": "tab:orange",
+        "+6K": "tab:red",
+    }
 
     for path in files:
         ds = xr.open_dataset(path)
@@ -119,8 +134,25 @@ def main() -> None:
             all_track_times.extend(pd.to_datetime(ds["time"].values))
 
         label = label_from_filename(path)
-        plt.plot(ds["lon"], ds["lat"], marker="o", markersize=2, linewidth=1.5,
-                 label=label, alpha=0.7)
+        line_color = track_colors.get(label, "tab:gray")
+        plt.plot(
+            ds["lon"],
+            ds["lat"],
+            marker="o",
+            markersize=2,
+            linewidth=1.5,
+            color=line_color,
+            label=label,
+            alpha=0.8,
+        )
+
+        run_legend_items.append((
+            (
+                Line2D([], [], linestyle="-", linewidth=2.0, color=line_color,
+                       marker="o", markersize=4, markerfacecolor=line_color, markeredgecolor=line_color),
+            ),
+            label,
+        ))
 
         # Mark one labeled point per day, preferring --label-hour UTC.
         if "time" in ds:
@@ -142,21 +174,14 @@ def main() -> None:
                     lat_val,
                     s=52,
                     marker="o",
-                    edgecolors="black",
+                    color=line_color,
+                    edgecolors=line_color,
                     linewidth=0.8,
-                    zorder=5,
-                )
-                date_str = t.strftime("%m-%d")
-                plt.annotate(
-                    date_str,
-                    (lon_val, lat_val),
-                    xytext=(3, 3),
-                    textcoords="offset points",
-                    fontsize=7,
-                    alpha=0.85,
+                    zorder=6,
                 )
 
                 if args.print_labeled_points:
+                    date_str = t.strftime("%m-%d")
                     print(
                         f"[{label}] label {date_str} at {t.strftime('%Y-%m-%d %H:%M')} "
                         f"-> lon={lon_val:.2f}, lat={lat_val:.2f}"
@@ -186,6 +211,15 @@ def main() -> None:
         )
 
         bt_label_idx = pick_daily_label_indices(bt_times, target_hour=args.label_hour)
+        bt_label_offsets = {
+            "10-03": (10, 0),
+            "10-04": (14, 0),
+            "10-05": (14, -5),
+            "10-06": (20, -16),
+            "10-07": (20, -24),
+            "10-08": (-20, -24),
+            "10-09": (-20, -24),
+        }
         for i in bt_label_idx:
             t = bt_times[i]
             plt.scatter(
@@ -198,12 +232,13 @@ def main() -> None:
                 zorder=11,
             )
             date_str = t.strftime("%m-%d")
+            xy_off = bt_label_offsets.get(date_str, (3, -8))
             plt.annotate(
                 date_str,
                 (bt_lon[i], bt_lat[i]),
-                xytext=(3, -8),
+                xytext=xy_off,
                 textcoords="offset points",
-                fontsize=7,
+                fontsize=annot_fs,
                 alpha=0.9,
                 color="black",
                 fontweight="bold",
@@ -215,11 +250,36 @@ def main() -> None:
                     f"-> lon={bt_lon[i]:.2f}, lat={bt_lat[i]:.2f}"
                 )
 
-    plt.title("Hurricane Kirk OIFS Track Comparison with Timesteps")
-    plt.xlabel("Longitude (deg)")
-    plt.ylabel("Latitude (deg)")
+    plt.title("Hurricane Kirk OIFS Track Comparison with Timesteps", fontsize=title_fs)
+    plt.xlabel("Longitude (deg)", fontsize=axis_label_fs)
+    plt.ylabel("Latitude (deg)", fontsize=axis_label_fs)
+    plt.xticks(fontsize=tick_fs)
+    plt.yticks(fontsize=tick_fs)
     plt.grid(True, alpha=0.3)
-    plt.legend(title="Run", loc="upper left", fontsize=9)
+
+    legend_handles = [h for h, _ in run_legend_items]
+    legend_labels = [lbl for _, lbl in run_legend_items]
+
+    if not args.no_best_track:
+        legend_handles.append(
+            Line2D([], [], linestyle="--", linewidth=2.2, color="black", marker="x", markersize=6)
+        )
+        legend_labels.append("Best track (archive)")
+
+    # Text-only legend note.
+    legend_handles.append(Line2D([], [], linestyle="None", marker=None, color="none"))
+    legend_labels.append("(big dots and crosses at 12UTC)")
+
+    leg = plt.legend(
+        legend_handles,
+        legend_labels,
+        loc="lower right",
+        fontsize=legend_fs,
+        frameon=True,
+        handler_map={tuple: HandlerTuple(ndivide=None, pad=0.4)},
+    )
+    # Make the explanatory note smaller than the run labels.
+    leg.get_texts()[-1].set_fontsize(int(round(legend_fs * 0.75)))
     plt.tight_layout()
     plt.savefig(args.output, dpi=170, bbox_inches="tight")
 

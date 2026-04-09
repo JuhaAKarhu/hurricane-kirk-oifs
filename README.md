@@ -60,13 +60,13 @@ fallback and should not be preferred when v04r01 is available.
 
 | Required variable | Ribberink name | OIFS file | OIFS shortName | Available? |
 |------------------|---------------|-----------|----------------|------------|
-| Mean sea-level pressure | `msl` | `ICMGGac3u` | `msl` | ✅ |
-| 10 m U-wind | `u10m` | `ICMGGac3u` | `10u` | ✅ |
-| 10 m V-wind | `v10m` | `ICMGGac3u` | `10v` | ✅ |
-| Geopotential @ 300 hPa | `z` | `ICMSHac3u` | `z` | ✅ |
-| Geopotential @ 600 hPa | `z` | `ICMSHac3u` | `z` | ✅ |
-| Geopotential @ 900 hPa | `z` | `ICMSHac3u` | `z` | ✅ |
-| IBTrACS best track | `best_track` | `data/IBTrACS.NA.v04r01.nc` | — | ✅ |
+| Mean sea-level pressure | `msl` | `ICMGGac3u` | `msl` | OK |
+| 10 m U-wind | `u10m` | `ICMGGac3u` | `10u` | OK |
+| 10 m V-wind | `v10m` | `ICMGGac3u` | `10v` | OK |
+| Geopotential @ 300 hPa | `z` | `ICMSHac3u` | `z` | OK |
+| Geopotential @ 600 hPa | `z` | `ICMSHac3u` | `z` | OK |
+| Geopotential @ 900 hPa | `z` | `ICMSHac3u` | `z` | OK |
+| IBTrACS best track | `best_track` | `data/IBTrACS.NA.v04r01.nc` | — | OK |
 
 **Note on geopotential**: OIFS outputs geopotential *Φ* (m² s⁻²). Ribberink's code uses
 geopotential height *Z* = Φ / g. The adapter in `scripts/oifs_adapter.py` performs this
