@@ -78,6 +78,18 @@ def _read_surface_field(filepath, shortname):
     raise KeyError(f"'{shortname}' not found in {filepath}")
 
 
+def _read_surface_field_any(filepath, shortnames):
+    """Read the first available shortName from a list in an ICMGG file."""
+    last_err = None
+    for name in shortnames:
+        try:
+            return _read_surface_field(filepath, name), name
+        except KeyError as e:
+            last_err = e
+            continue
+    raise last_err if last_err is not None else KeyError(f"No shortName found in {filepath}")
+
+
 def _read_pressure_field(filepath, shortname, levels=None):
     """Read pressure-level variable from an ICMSH or ICMUA GRIB file."""
     ds_list = cfgrib.open_datasets(filepath, backend_kwargs={'indexpath': ''})
@@ -178,8 +190,11 @@ class OIFSRun:
         """
         chunks = []
         for filepath, step in zip(self._gg_files, self.steps):
-            u = _read_surface_field(filepath, '10u').rename({'10u': 'u10m'})
-            v = _read_surface_field(filepath, '10v').rename({'10v': 'v10m'})
+            # Some OIFS outputs expose 10m winds as 10u/10v, others as u10/v10.
+            u, u_name = _read_surface_field_any(filepath, ['10u', 'u10'])
+            v, v_name = _read_surface_field_any(filepath, ['10v', 'v10'])
+            u = u.rename({u_name: 'u10m'})
+            v = v.rename({v_name: 'v10m'})
             ds = xr.merge([u, v])
             ds = _add_time_coord(ds, step)
             chunks.append(ds)

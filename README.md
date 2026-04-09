@@ -1,8 +1,9 @@
 # Hurricane Kirk OIFS Forecast Analysis
 
-Analysis of Hurricane Kirk (2024) track and core size using OpenIFS (OIFS) forecast
-simulations with different SST perturbations. Based on methods from
-[Ribberink et al. (2025)](https://doi.org/10.5194/egusphere-2025-218).
+Analysis of Hurricane Kirk (2024) in OpenIFS (OIFS) SST-perturbation forecasts,
+with **Hart Cyclone Phase Space (CPS)** as the central diagnostic and storm-track/
+wind-radius analyses as supporting components. The workflow explicitly reuses
+Ribberink et al. (2025) methods and code interfaces from `ribberink_code/`.
 
 ## Experiments
 
@@ -30,11 +31,25 @@ Each run directory contains three GRIB file types per timestep:
 
 ## Analysis Goals
 
-1. **Track** – Hurricane centre position and minimum sea-level pressure over time
-2. **Core size** – Wind radii (R17, R34 in m/s) and Cyclone Phase Space (Hart 2003)
-3. **SST sensitivity** – Compare track/intensity/size across the four SST perturbation experiments
+1. **CPS-first structure diagnosis** – Hart parameters (*B*, *V_T^U*, *V_T^L*) across runs
+2. **Core radius evolution** – Direction-aware and mean wind-radius diagnostics (R17, R34, R50)
+3. **Track as required input** – Storm-centre time series for storm-relative sampling
+4. **SST sensitivity** – Compare structure/intensity evolution across all four experiments
 
 ## Methods (Ribberink et al. 2025)
+
+This project follows a **CPS-centered pipeline** derived from Ribberink et al.:
+
+1. Compute storm track (minimum MSLP search-box propagation)
+2. Use that track to construct storm-relative geopotential fields
+3. Compute Hart CPS via Ribberink `hart` implementation
+4. Complement with wind-radius/core-size diagnostics
+
+Primary reused code is in `ribberink_code/hurricane_functions.py`:
+
+- `storm_tracker` for centre tracking
+- `hart` for CPS metrics and hemisphere-aware asymmetry
+- `magnitude` and related helpers used by wind diagnostics
 
 - **Storm tracking** (`storm_tracker`): follows minimum MSLP within a search box, initialised
   from the IBTrACS best track position at the first timestep. The local tracker now
@@ -43,6 +58,41 @@ Each run directory contains three GRIB file types per timestep:
 - **Cyclone Phase Space** (`hart`): asymmetry parameter *B* and thermal wind *V_T* from
   geopotential height differences at 300/600 and 600/900 hPa across a 500 km radius.
 - **Wind radius** (`wind_radius`): meridional/zonal slices through storm centre of 10 m wind speed.
+- **Directional core radius** (this repo): radii are evaluated relative to storm motion
+  (forward/backward/left/right), plus mean-radius diagnostics for each wind threshold.
+
+## Status Snapshot (April 2026)
+
+### Track analysis
+
+- Status: **completed baseline**
+- Implemented in `notebooks/02_track_analysis.ipynb` and `scripts/run_track.py`
+- Outputs present in `plots/tracks/` for all four runs (`track_*.nc` and CSV exports)
+
+### CPS analysis (core project axis)
+
+- Status: **method implemented, execution/validation pending in current workspace state**
+- Implemented in `notebooks/03_cps_analysis.ipynb` and `run_cps_analysis.py`
+- Uses OIFS geopotential-height conversion in `scripts/oifs_adapter.py` and Ribberink `hart`
+- Current repository `plots/` does not yet contain `kirk_cps.png`, so final CPS figures should be regenerated and checked
+
+### Core radius / wind-radius analysis
+
+- Status: **implemented and extended with direction-aware metrics; validation plots still pending**
+- Implemented in `notebooks/04_wind_radius.ipynb` (storm-relative E-W/N-S slices, threshold contours, R17 time series)
+- Batch script implemented in `scripts/core_radius_metrics.py` for directional + mean radius metrics
+- Outputs: `plots/tracks/core_radius_<run>.csv` and `plots/tracks/core_radius_summary.csv`
+- Current repository `plots/` does not yet contain `kirk_windradius_*.png` or `kirk_R17.png`
+
+## Prompt Reproducibility Logs
+
+To support prompt-level reproducibility, this repository now tracks:
+
+- `project_prompts.md` (user prompts only)
+- `project_prompts_and_responses.md` (prompt + response summaries)
+
+Current note:
+- Prior-session prompts were not found in this workspace, so logging starts from the first recorded entry in these files.
 
 ## Best-Track Data
 
@@ -85,12 +135,15 @@ hurricane_kirk/
 ├── scripts/
 │   ├── oifs_adapter.py            # Read OIFS GRIB → xarray (Ribberink-compatible)
 │   ├── run_track.py               # Batch track computation for all runs
+│   ├── core_radius_metrics.py     # Direction-aware and mean core-radius metrics
 │   ├── plot_tracks_comparison.py  # Plot all runs and optional best-track overlay
 │   └── download_ibtracs.py        # Download IBTrACS best track for Kirk 2024
 ├── ribberink_code/                # Cloned from MRibberink/OpheliaPaperCode
 ├── plots/                         # Output figures (not committed)
 ├── data/                          # IBTrACS file (not committed, too large)
 ├── .gitignore
+├── project_prompts.md             # Prompt-only reproducibility log
+├── project_prompts_and_responses.md  # Prompt+response reproducibility log
 ├── README.md
 └── requirements.txt
 ```
