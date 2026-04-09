@@ -157,12 +157,19 @@ hurricane_kirk/
 
 ### 1. Python environment
 
-The analysis uses the existing `.venv` in `run_oifs`. Additional packages needed:
+Use a project-local environment in this repository (`hurricane_kirk/.venv`) so sessions are reproducible and independent from sibling workspaces.
 
 ```bash
-source /users/jfkarhu/Numlab/run_oifs/.venv/bin/activate
-pip install haversine matplotlib cartopy jupyter scipy
+cd /users/jfkarhu/Numlab/hurricane_kirk
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
 ```
+
+Note:
+- `cfgrib`/`eccodes` Python packages are included in `requirements.txt`.
+- Depending on system configuration, ecCodes system libraries may still be needed (on Mahti, use `module load eccodes`).
 
 ### 2. IBTrACS data for Kirk 2024
 
@@ -176,7 +183,7 @@ wget https://www.ncei.noaa.gov/data/international-best-track-archive-for-climate
 
 ```bash
 cd /users/jfkarhu/Numlab/hurricane_kirk
-source /users/jfkarhu/Numlab/run_oifs/.venv/bin/activate
+source .venv/bin/activate
 module load eccodes git/2.40.0
 jupyter notebook
 ```
@@ -185,7 +192,7 @@ jupyter notebook
 
 ```bash
 cd /users/jfkarhu/Numlab/hurricane_kirk
-source /users/jfkarhu/Numlab/run_oifs/.venv/bin/activate
+source .venv/bin/activate
 
 # Recompute tracks for all four SST experiments
 python scripts/run_track.py
