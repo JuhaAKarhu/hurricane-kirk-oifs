@@ -67,3 +67,23 @@ This possibly happened because the computing node session in Mahti was terminate
 ## 2026-04-10
 
 19. "I need to interrupt the process now for the day. Make necessary remarks on README.md so that you know where we stopped this time so that a smooth restart can happen tomorrow. Commit all changes and push!"
+
+20. "Check /users/jfkarhu/Numlab/hurricane_kirk/README.md abd see where we stopped and please, continue the work from there!"
+
+21. "It seems as if you are stuck. Please, investigate!"
+
+22. "It seems you are stuck again!"
+
+23. "There was connection problems, please try again!"
+
+24. "There seems to be problems in continuing the project work. Try again, but, please, if you get stalled/stuck cancel the work yourself, if possible!"
+
+25. "You have been loading something for quite a while and the process looks unresponsive again. Please investigate and retry!"
+
+26. "First I have some questions about the ett_start_timing.png -plot. What are closed/full markers that appear once on the B-graphs and what do the vertical dashed lines that cross them signify?"
+
+27. "Modify the colour coding of the runs to match that in track_comparison.png!"
+
+28. "Regenarate ett_start_timing.png"
+
+29. "Commit all changes and push!"

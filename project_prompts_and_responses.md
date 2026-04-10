@@ -228,3 +228,91 @@ Are you sure the spectral file conversion was successful? You might want to chec
     - a concrete restart command sequence for next session.
   - Updated reproducibility logs with this prompt/response entry.
   - Prepared repository for commit/push including all current tracked and untracked work.
+
+## 2026-04-10 (continued)
+
+### Prompt 20
+Check /users/jfkarhu/Numlab/hurricane_kirk/README.md abd see where we stopped and please, continue the work from there!
+
+### Response 20 (summary)
+- Reviewed `README.md`, `COMPLETION_SUMMARY_2026-04-10.md`, and prompt logs to identify the last unfinished item.
+- Confirmed that the next pending execution step was `run_ett_timing_analysis.py` for ETT-start timing outputs.
+
+### Prompt 21
+It seems as if you are stuck. Please, investigate!
+
+### Response 21 (summary)
+- Investigated the apparent stall and confirmed this was a workflow interruption rather than a hard runtime blocker.
+- Moved execution forward by preparing to run and validate the pending ETT analysis script.
+
+### Prompt 22
+It seems you are stuck again!
+
+### Response 22 (summary)
+- Restarted with explicit diagnostics and direct script execution.
+- Confirmed `run_ett_timing_analysis.py` was runnable and produced expected outputs when executed cleanly.
+
+### Prompt 23
+There was connection problems, please try again!
+
+### Response 23 (summary)
+- Retried the full run path after connection interruption.
+- Re-executed the ETT pipeline and reconfirmed successful completion with generated output files.
+
+### Prompt 24
+There seems to be problems in continuing the project work. Try again, but, please, if you get stalled/stuck cancel the work yourself, if possible!
+
+### Response 24 (summary)
+- Re-ran the ETT analysis with captured logs to avoid silent hangs and make failures observable.
+- Verified successful completion (`exit code 0`) and output generation.
+- Isolated noisy xarray warning streams as the main reason execution appeared unresponsive.
+
+### Prompt 25
+You have been loading something for quite a while and the process looks unresponsive again. Please investigate and retry!
+
+### Response 25 (summary)
+- Investigated process state and found no stuck background Python/Jupyter jobs.
+- Re-ran `run_ett_timing_analysis.py` and confirmed successful outputs:
+  - `plots/ett_start_timing.png`
+  - `plots/tracks/ett_start_summary.csv`
+  - `plots/tracks/ett_B_timeseries_*.csv`
+- Applied warning-reduction fixes to keep reruns responsive:
+  - `ribberink_code/hurricane_functions.py`: explicit `join='outer'` in `xr.concat(...)`.
+  - `scripts/oifs_adapter.py`: explicit `coords='different', compat='equals'` in `xr.concat(...)`.
+- Final validation run completed with `exit code 0` and no remaining `FutureWarning` lines in the filtered log output.
+
+### Prompt 26
+First I have some questions about the ett_start_timing.png -plot. What are closed/full markers that appear once on the B-graphs and what do the vertical dashed lines that cross them signify?
+
+### Response 26 (summary)
+- Clarified figure semantics from `run_ett_timing_analysis.py`:
+  - filled marker: first timestamp where lower-layer asymmetry exceeds threshold (`B > 10 m`) for each run,
+  - vertical dotted line: that same ETT-start timestamp for visual timing comparison,
+  - horizontal black line: threshold reference (`B = 10 m`).
+
+### Prompt 27
+Modify the colour coding of the runs to match that in track_comparison.png!
+
+### Response 27 (summary)
+- Updated `run_ett_timing_analysis.py` run-color map to match `scripts/plot_tracks_comparison.py` exactly:
+  - `-3K`: `tab:blue`
+  - `baserun`: `tab:green`
+  - `+3K`: `tab:orange`
+  - `+6K`: `tab:red`
+
+### Prompt 28
+Regenarate ett_start_timing.png
+
+### Response 28 (summary)
+- Re-ran `run_ett_timing_analysis.py` to regenerate ETT timing outputs.
+- Confirmed successful completion for all four runs with unchanged ETT-start timestamps.
+- Rewrote outputs:
+  - `plots/ett_start_timing.png`
+  - `plots/tracks/ett_start_summary.csv`
+
+### Prompt 29
+Commit all changes and push!
+
+### Response 29 (summary)
+- Logged this prompt in both reproducibility files before version-control actions.
+- Staged all tracked changes in the repository, created a single commit, and pushed it to `origin/main`.

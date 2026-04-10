@@ -70,10 +70,10 @@ def main():
     smooth_n = 2
 
     colors = {
-        'baserun': '#1f77b4',
-        '+3K': '#d62728',
-        '+6K': '#ff7f0e',
-        '-3K': '#2ca02c',
+        '-3K': 'tab:blue',
+        'baserun': 'tab:green',
+        '+3K': 'tab:orange',
+        '+6K': 'tab:red',
     }
 
     run_data = {}

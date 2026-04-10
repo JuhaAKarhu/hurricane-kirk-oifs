@@ -89,17 +89,20 @@ Primary reused code is in `ribberink_code/hurricane_functions.py`:
 - CPS preprocessing and plotting path is now working with gridded geopotential input (`scripts/convert_spectral_to_grid.sh`, `scripts/oifs_adapter.py`, `run_cps_analysis.py`).
 - Ribberink Fig. 5-style ETT timing logic has been identified from `ribberink_code/new_hart_comp.ipynb`:
   - ETT start criterion used there is first time where lower-layer asymmetry exceeds threshold: `B > 10 m` (600-900 hPa layer).
-- A dedicated multi-run timing script has been created: `run_ett_timing_analysis.py`.
+- A dedicated multi-run timing script has been created and validated: `run_ett_timing_analysis.py`.
   - It computes lower-layer B series per run and ET-start timestamps using the same threshold criterion.
-  - It is intended to write `plots/ett_start_timing.png` and `plots/tracks/ett_start_summary.csv`.
-- Important: this ETT script was created but not fully executed/validated in this interrupted session.
+  - It writes `plots/ett_start_timing.png`, `plots/tracks/ett_start_summary.csv`, and per-run `plots/tracks/ett_B_timeseries_<run>.csv` files.
+  - Latest ET-start timestamps:
+    - `baserun`: 2024-10-06 06:00 UTC
+    - `+3K`: 2024-10-06 15:00 UTC
+    - `+6K`: 2024-10-06 15:00 UTC
+    - `-3K`: 2024-10-07 09:00 UTC
 
-Suggested restart sequence for tomorrow:
+Suggested restart sequence:
 1. `cd /users/jfkarhu/Numlab/hurricane_kirk`
 2. `source .venv/bin/activate`
-3. `python run_ett_timing_analysis.py`
-4. Verify outputs in `plots/` and `plots/tracks/`
-5. If needed, continue with `notebooks/05_multi_run_comparison.ipynb`
+3. If needed, rerun `python run_ett_timing_analysis.py`
+4. Continue with `notebooks/05_multi_run_comparison.ipynb`
 
 ## Prompt Reproducibility Logs
 

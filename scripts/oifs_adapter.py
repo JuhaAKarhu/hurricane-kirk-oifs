@@ -312,7 +312,7 @@ class OIFSRun:
             merged = _add_time_coord(merged, step)
             chunks.append(merged)
 
-        return xr.concat(chunks, dim='time')
+        return xr.concat(chunks, dim='time', coords='different', compat='equals')
 
     # ------------------------------------------------------------------
     # Convenience: load single timestep (faster for interactive use)

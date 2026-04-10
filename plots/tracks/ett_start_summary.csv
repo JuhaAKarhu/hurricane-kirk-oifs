@@ -1,0 +1,5 @@
+run,et_start_time_utc,crossing_threshold_m,smooth_window_n
+baserun,2024-10-06T06:00:00,10.0,2
++3K,2024-10-06T15:00:00,10.0,2
++6K,2024-10-06T15:00:00,10.0,2
+-3K,2024-10-07T09:00:00,10.0,2
