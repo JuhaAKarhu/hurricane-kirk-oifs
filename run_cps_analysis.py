@@ -9,6 +9,7 @@ import xarray as xr
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import pandas as pd
 
 from oifs_adapter import RUNS, OIFSRun, gridded_z_dir
 import hurricane_functions as hf
@@ -77,7 +78,13 @@ for run_name, run_dir in RUNS.items():
     print(f'  B_u range: [{np.nanmin(B_u):.1f}, {np.nanmax(B_u):.1f}], NaN count: {np.isnan(B_u).sum()}/{len(B_u)}')
     print(f'  VT_u range: [{np.nanmin(VT_u):.1f}, {np.nanmax(VT_u):.1f}], NaN count: {np.isnan(VT_u).sum()}/{len(VT_u)}')
 
-colors = {'baserun': '#1f77b4', '+3K': '#d62728', '+6K': '#ff7f0e', '-3K': '#2ca02c'}
+# Match color coding used by scripts/plot_tracks_comparison.py
+colors = {
+    '-3K': 'tab:blue',
+    'baserun': 'tab:green',
+    '+3K': 'tab:orange',
+    '+6K': 'tab:red',
+}
 
 fig, axes = plt.subplots(1, 2, figsize=(14, 6))
 
@@ -89,14 +96,43 @@ for ax_idx, (ax, vt_key, title) in enumerate([
     for run_name, res in cps_results.items():
         b_vals = res['B_c']
         vt_vals = res[vt_key]
+        times = pd.to_datetime(res['times'])
         # Only plot non-NaN points
         valid_mask = ~(np.isnan(b_vals) | np.isnan(vt_vals))
         if valid_mask.sum() > 0:
-            sc = ax.scatter(b_vals[valid_mask], vt_vals[valid_mask],
-                            c=colors.get(run_name, 'k'),
-                            label=run_name, s=30, alpha=0.8, zorder=3)
-            ax.plot(b_vals[valid_mask], vt_vals[valid_mask],
-                    color=colors.get(run_name, 'k'), alpha=0.4, lw=1)
+            b_plot = b_vals[valid_mask]
+            vt_plot = vt_vals[valid_mask]
+            t_plot = times[valid_mask]
+
+            ax.scatter(
+                b_plot,
+                vt_plot,
+                c=colors.get(run_name, 'k'),
+                label=run_name,
+                s=30,
+                alpha=0.8,
+                zorder=3,
+            )
+            ax.plot(
+                b_plot,
+                vt_plot,
+                color=colors.get(run_name, 'k'),
+                alpha=0.4,
+                lw=1,
+            )
+
+            # Annotate 00UTC points with date-time text.
+            for b_pt, vt_pt, t_pt in zip(b_plot, vt_plot, t_plot):
+                if pd.Timestamp(t_pt).hour == 0:
+                    ax.annotate(
+                        pd.Timestamp(t_pt).strftime('%m-%d %HZ'),
+                        xy=(b_pt, vt_pt),
+                        xytext=(4, 4),
+                        textcoords='offset points',
+                        fontsize=7,
+                        color=colors.get(run_name, 'k'),
+                        alpha=0.9,
+                    )
             plot_count += valid_mask.sum()
         else:
             print(f'WARNING: No valid CPS points for {run_name} on {vt_key}')

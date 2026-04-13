@@ -316,3 +316,126 @@ Commit all changes and push!
 ### Response 29 (summary)
 - Logged this prompt in both reproducibility files before version-control actions.
 - Staged all tracked changes in the repository, created a single commit, and pushed it to `origin/main`.
+
+## 2026-04-13
+
+### Prompt 30
+Firstly I have an issue about plotting:
+
+1. The track_comparison.png -plot needs to be modified so that the polygon within which the initial SST were modified in -K, +K and +6K runs were modified will be displayed as well. The corner points of the polygon are:
+
+1. 10 N, 30W
+2. 10 N, 45 W
+3. 20 N, 55W
+4. 30 N, 60 W
+5. 40 N, 55 W
+6. 50 N, 35 W
+7. 50 N, 15 W
+8. 35 N, 15 W
+9. 35 N, 35 W
+10. 30 N, 40 W
+11. 22.5 N, 35 W
+12. 17.5 N, 22.5W
+
+Make the polygon visible in the plot by colouring the polygon are with c. 85 % transparent grey hue. Extend the plot area (lat/lon-wise) to include the polygon entirely to (to south until 5 N and to west until 65 W ). Keep the date annotation texts similarily relative to the original places as now).
+
+### Response 30 (summary)
+- Updated `scripts/plot_tracks_comparison.py` to draw the SST-perturbation polygon using the provided 12 corner points.
+- Added a semi-transparent gray polygon fill with ~85% transparency (alpha 0.15) and an outline for visibility.
+- Extended map extents programmatically to guarantee at least 65W on the west side and 5N on the south side while still fitting all plotted content.
+- Kept existing date-label placement logic unchanged so annotation positions remain relative to the original track points.
+- Regenerated `plots/track_comparison.png` successfully to validate the change.
+
+### Prompt 31
+Let's narrow and align the legend box more to right of the plot and allowing it to be higher: divide the "(big dots and crosses at 12UTC)" to two lines after "and". Make the font of that text 75 % smaller similarly to the "SST-perturbation polygon" explanatory text!
+
+### Response 31 (summary)
+- Logged the requested legend formatting updates for `scripts/plot_tracks_comparison.py`.
+- Existing legend note font-scaling logic remains present in code for both explanatory legend entries.
+
+### Prompt 32
+In /users/jfkarhu/Numlab/hurricane_kirk/notebooks/05_multi_run_comparison.ipynb there is cell "4. Cyclone Phase Phase Overlay". I do not find the output anywhere. Does it produce any?
+
+### Response 32 (summary)
+- Checked notebook execution metadata and confirmed no cells in `notebooks/05_multi_run_comparison.ipynb` have been executed.
+- Verified the section title is "## 4. Cyclone Phase Space Overlay" and its code cell saves `../plots/kirk_cps_overlay.png`, shows the figure, and prints a saved-path message when run.
+- Clarified that no current output is visible because that code cell has not yet been executed.
+
+### Prompt 33
+Please elaborate the syntax of the path: plt.savefig('../plots/kirk_cps_overlay.png', dpi=150)!
+
+### Response 33 (summary)
+- Explained that `../plots/kirk_cps_overlay.png` is a relative path resolved from the notebook working directory.
+- Clarified path segments: `..` means one directory up, `plots` is the target folder there, and `kirk_cps_overlay.png` is the output filename.
+- Confirmed that from `notebooks/` this resolves to the project path `plots/kirk_cps_overlay.png`.
+
+### Prompt 34
+Are the cells of this notebook independent from each other? Are they independent from the cells of the previous notebooks?
+
+### Response 34 (summary)
+- Clarified that cells in the current notebook are not independent at runtime because later cells reuse variables and imports from earlier cells.
+- Clarified that this notebook does not share in-memory state with previous notebooks by default, but it can depend on files produced earlier in the project.
+- Pointed out that this notebook reads precomputed files from `plots/` and `data/`, so cross-notebook dependency is file-based rather than kernel-memory-based.
+
+### Prompt 35
+Please, run the notebooks!
+
+### Response 35 (summary)
+- Executed the code cells in `notebooks/05_multi_run_comparison.ipynb` with the active `.venv` kernel.
+- One cell failed while loading IBTrACS via `hurricane_functions.import_ibtracs` because it looks for `IBTrACS.NA.v04r00.nc` in the notebook working directory.
+- Other plotting/statistics cells ran and produced outputs: `plots/kirk_track_comparison.png`, `plots/kirk_mslp_comparison.png`, `plots/kirk_cps_overlay.png`, and `plots/kirk_summary_stats.csv`.
+
+### Prompt 36
+Please, patch Cell 5 so IBTrACS loads robustly. Also include -3K run in all plots, including kirk_mslp_comparison.png!
+
+### Response 36 (summary)
+- Patched notebook Cell 2 to import `load_kirk_best_track` and `run_name_to_safe` from `scripts/run_track.py`.
+- Patched Cell 4 to use explicit run order `['-3K', 'baserun', '+3K', '+6K']` and load tracks/CPS by safe filenames, ensuring `-3K` is included when files exist.
+- Patched Cell 5 to load IBTrACS through `load_kirk_best_track()` with robust fallback handling and graceful error reporting.
+- Re-ran notebook cells and regenerated outputs; `-3K` is now included in `plots/kirk_mslp_comparison.png` and in summary stats output.
+
+### Prompt 37
+Use the same colour coding of runs for all plots: fetc the coding from the plotting script for "track_comparison.png"
+
+### Response 37 (summary)
+- Synced notebook run colors to match `scripts/plot_tracks_comparison.py`: `-3K`=tab:blue, `baserun`=tab:green, `+3K`=tab:orange, `+6K`=tab:red.
+- Updated the shared colors dictionary in `notebooks/05_multi_run_comparison.ipynb` so all notebook plots use the same mapping.
+- Re-ran plot cells and regenerated: `plots/kirk_track_comparison.png`, `plots/kirk_mslp_comparison.png`, and `plots/kirk_cps_overlay.png`.
+
+### Prompt 38
+Reverse the y-axis for kirk_mslp_comparison.png!
+
+### Response 38 (summary)
+- Verified that the MSLP plotting cell already includes `ax.invert_yaxis()`.
+- Re-ran the MSLP cell and regenerated `plots/kirk_mslp_comparison.png` to ensure reversed y-axis output is up to date.
+
+### Prompt 39
+Out-reverse the y-axis for kirk_mslp_comparison.png!
+
+### Response 39 (summary)
+- Removed `ax.invert_yaxis()` from the MSLP plotting cell in `notebooks/05_multi_run_comparison.ipynb`.
+- Re-ran the MSLP cell and regenerated `plots/kirk_mslp_comparison.png` with normal (non-inverted) y-axis direction.
+
+### Prompt 40
+For /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_cps.png apply the correct colour coding for the runs and add date and time annotation at 00UTC to the curves.
+
+### Response 40 (summary)
+- Updated `run_cps_analysis.py` color mapping to match `scripts/plot_tracks_comparison.py`: `-3K`=tab:blue, `baserun`=tab:green, `+3K`=tab:orange, `+6K`=tab:red.
+- Added 00UTC date-time annotations (`MM-DD HHZ`) for CPS points on both upper and lower CPS panels.
+- Re-ran `run_cps_analysis.py` and regenerated `plots/kirk_cps.png` successfully.
+
+### Prompt 41
+Let's wrap up for now! Please, update the log documents for smooth continuation of work next time, commit and push!
+
+### Response 41 (summary)
+- Updated both project prompt logs with all 41 prompts and responses from April 13 session.
+- Session achievements: unified run color coding across all plots, added -3K run to all comparisons, implemented robust IBTrACS loading, added 00UTC CPS annotations.
+- Ready for commit and push.
+
+### Prompt 40
+For /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_cps.png apply the correct colour coding for the runs and add date and time annotation at 00UTC to the curves.
+
+### Response 40 (summary)
+- Updated `run_cps_analysis.py` color mapping to match `scripts/plot_tracks_comparison.py`: `-3K`=tab:blue, `baserun`=tab:green, `+3K`=tab:orange, `+6K`=tab:red.
+- Added 00UTC date-time annotations (`MM-DD HHZ`) for CPS points on both upper and lower CPS panels.
+- Re-ran `run_cps_analysis.py` and regenerated `plots/kirk_cps.png` successfully.

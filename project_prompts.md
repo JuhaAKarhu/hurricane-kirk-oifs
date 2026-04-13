@@ -87,3 +87,48 @@ This possibly happened because the computing node session in Mahti was terminate
 28. "Regenarate ett_start_timing.png"
 
 29. "Commit all changes and push!"
+
+## 2026-04-13
+
+30. "Firstly I have an issue about plotting:
+
+1. The track_comparison.png -plot needs to be modified so that the polygon within which the initial SST were modified in -K, +K and +6K runs were modified will be displayed as well. The corner points of the polygon are:
+
+1. 10 N, 30W
+2. ⁠10 N, 45 W
+3. ⁠20 N, 55W
+4. ⁠30 N, 60 W
+5. ⁠40 N, 55 W
+6. ⁠50 N, 35 W
+7. ⁠50 N, 15 W
+8. ⁠35 N, 15 W
+9. ⁠35 N, 35 W
+10. ⁠30 N, 40 W
+11. ⁠22.5 N, 35 W
+12. ⁠17.5 N, 22.5W
+
+Make the polygon visible in the plot by colouring the polygon are with c. 85 % transparent grey hue. Extend the plot area (lat/lon-wise) to include the polygon entirely to (to south until 5 N and to west until 65 W ). Keep the date annotation texts similarily relative to the original places as now)."
+
+31. "Let's narrow and align the legend box more to right of the plot and allowing it to be higher: divide the "(big dots and crosses at 12UTC)" to two lines after "and". Make the font of that text 75 % smaller similarly to the "SST-perturbation polygon" explanatory text!"
+
+32. "In /users/jfkarhu/Numlab/hurricane_kirk/notebooks/05_multi_run_comparison.ipynb there is cell "4. Cyclone Phase Phase Overlay". I do not find the output anywhere. Does it produce any?"
+
+33. "Please elaborate the syntax of the path: plt.savefig('../plots/kirk_cps_overlay.png', dpi=150)!"
+
+34. "Are the cells of this notebook independent from each other? Are they independent from the cells of the previous notebooks?"
+
+35. "Please, run the notebooks!"
+
+36. "Please, patch Cell 5 so IBTrACS loads robustly. Also include -3K run in all plots, including kirk_mslp_comparison.png!"
+
+37. "Use the same colour coding of runs for all plots: fetc the coding from the plotting script for \"track_comparison.png\""
+
+38. "Reverse the y-axis for kirk_mslp_comparison.png!"
+
+39. "Out-reverse the y-axis for kirk_mslp_comparison.png!"
+
+40. "For /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_cps.png apply the correct colour coding for the runs and add date and time annotation at 00UTC to the curves."
+
+41. "Let's wrap up for now! Please, update the log documents for smooth continuation of work next time, commit and push!"
+
+40. "For /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_cps.png apply the correct colour coding for the runs and add date and time annotation at 00UTC to the curves."

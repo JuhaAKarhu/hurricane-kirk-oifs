@@ -104,20 +104,52 @@ Suggested restart sequence:
 3. If needed, rerun `python run_ett_timing_analysis.py`
 4. Continue with `notebooks/05_multi_run_comparison.ipynb`
 
-## Prompt Reproducibility Logs
+## Session Workflow & Reproducibility
 
-To support prompt-level reproducibility, this repository now tracks:
+### At Session Start
+1. Read `COMPLETION_SUMMARY_<DATE>.md` for quick status recap.
+2. Read `project_prompts.md` and `project_prompts_and_responses.md` headers to continue numbering.
+3. Refer to README.md "Status Snapshot" section for current completion state.
+
+### During Session
+- **Append promptly**: After each new user prompt, immediately add entries to both:
+  - `project_prompts.md` (user prompt only)
+  - `project_prompts_and_responses.md` (prompt #N + response summary)
+- **Avoid stalls during wrap-up**: When committing, do NOT load data files or run expensive operations. Keep wrap-up operations lightweight (log-writing + git commands only).
+- **Include logs in commits**: Every commit should include both log files if they changed.
+
+### At Session End (Wrap-Up Protocol)
+1. **Update prompt logs** with final prompt+response entries.
+2. **Create/update completion summary**: `COMPLETION_SUMMARY_<DATE>.md`
+   - Key achievements, file modifications, pending tasks.
+   - Quick-start commands for next session.
+   - Known issues and blockers.
+3. **Avoid data loading**: Do not run analysis scripts or load GRIB/NetCDF during wrap-up. Use only lightweight file I/O.
+4. **Git setup for HPC** (IMPORTANT):
+   - **Use bash terminal only** (not Python terminal) for git commands
+   - **Load git module** before committing:
+     ```bash
+     source .project_setup.sh    # Auto-loads git/2.40.0
+     # OR manually:
+     module load git
+     ```
+   - Why: Git is installed via spack on HPC but not in default PATH
+5. **Commit & push**:
+   ```bash
+   # Ensure git is available first:
+   source .project_setup.sh
+
+   # Then stage and commit:
+   git add project_prompts.md project_prompts_and_responses.md COMPLETION_SUMMARY_*.md <modified-scripts>
+   git commit -m "Session <date>: <brief achievement summary>"
+   git push
+   ```
+
+### Prompt Reproducibility Logs
 
 - `project_prompts.md` (user prompts only)
 - `project_prompts_and_responses.md` (prompt + response summaries)
-
-Session/commit policy:
-- At the beginning of a new session, first read both log files and continue numbering from the latest entry.
-- After each new user prompt, append entries to both files (prompt-only and prompt+response summary).
-- Include both log files in every commit where they changed.
-
-Current note:
-- Prior-session prompts were not found in this workspace, so logging starts from the first recorded entry in these files.
+- Prior-session prompts were not found at start, so logging began at first recorded entry.
 
 ## Best-Track Data
 
