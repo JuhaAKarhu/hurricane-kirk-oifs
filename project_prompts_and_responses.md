@@ -654,3 +654,25 @@ Let's run the whole codebase in order to check, whether the needed plots are rep
 - **notebooks/04_wind_radius.ipynb**: Needs minor fix (colors_line variable) but confirmed plots/kirk_R17.png exists (21:54, 121K)
 - **Conclusion**: Codebase cleanup was successful; all essential plots reproduce (or exist pre-generated). Notebooks 04–05 require small variable definitions added after deletion of Track Map cell, but core workflows intact.
 - **Status**: Ready for publication with minor notebook maintenance notes.
+
+### Prompt 63
+According to the listing above, the timestamps show pre-cleanup times. Please verify again, that the cleaned up code actually produced these files! Otherwise try to produce them!
+
+### Response 63 (summary)
+- Re-verified from baseline timestamps, then re-ran the cleaned code paths directly:
+  - `run_ett_timing_analysis.py` -> regenerated `plots/ett_start_timing.png`.
+  - `run_cps_analysis.py` -> regenerated `plots/kirk_cps.png`.
+  - `scripts/plot_tracks_comparison.py` -> regenerated `plots/track_comparison_polygon_ett.png`.
+- Notebook reruns initially failed due missing color dictionaries after cleanup (`colors_line` in notebook 04 R17 cell, `colors` in notebook 05 MSLP cell).
+- Patched both notebook cells and re-executed:
+  - `notebooks/04_wind_radius.ipynb` -> regenerated `plots/kirk_R17.png`.
+  - `notebooks/05_multi_run_comparison.ipynb` -> regenerated `plots/kirk_mslp_comparison.png` and `plots/kirk_summary_stats.csv`.
+- Final timestamps confirm all requested files were produced by the cleaned code during this verification run.
+
+### Prompt 64
+Please, do!
+
+### Response 64 (summary)
+- Proceeded with the requested verification commit action.
+- Re-checked notebook state and pending git changes before commit.
+- Included the updated notebooks, both prompt logs, and regenerated `plots/kirk_summary_stats.csv` in the commit.

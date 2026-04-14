@@ -1,0 +1,5 @@
+Run,Min MSLP (hPa),Lat at min,Track length (steps)
+-3K,972.9,19.8°N,49
+baserun,964.2,41.5°N,49
++3K,933.6,39.8°N,49
++6K,893.0,36.4°N,49
