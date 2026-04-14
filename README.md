@@ -107,7 +107,7 @@ Suggested restart sequence:
 ## Session Workflow & Reproducibility
 
 ### At Session Start
-1. Read `COMPLETION_SUMMARY_<DATE>.md` for quick status recap.
+1. Read `docs/session_archive/COMPLETION_SUMMARY_<DATE>.md` for quick status recap.
 2. Read `project_prompts.md` and `project_prompts_and_responses.md` headers to continue numbering.
 3. Refer to README.md "Status Snapshot" section for current completion state.
 
@@ -120,7 +120,7 @@ Suggested restart sequence:
 
 ### At Session End (Wrap-Up Protocol)
 1. **Update prompt logs** with final prompt+response entries.
-2. **Create/update completion summary**: `COMPLETION_SUMMARY_<DATE>.md`
+2. **Create/update completion summary**: `docs/session_archive/COMPLETION_SUMMARY_<DATE>.md`
    - Key achievements, file modifications, pending tasks.
    - Quick-start commands for next session.
    - Known issues and blockers.
@@ -140,7 +140,7 @@ Suggested restart sequence:
    source .project_setup.sh
 
    # Then stage and commit:
-   git add project_prompts.md project_prompts_and_responses.md COMPLETION_SUMMARY_*.md <modified-scripts>
+  git add project_prompts.md project_prompts_and_responses.md docs/session_archive/COMPLETION_SUMMARY_*.md <modified-scripts>
    git commit -m "Session <date>: <brief achievement summary>"
    git push
    ```

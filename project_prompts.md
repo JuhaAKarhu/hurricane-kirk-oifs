@@ -193,3 +193,9 @@ Make the polygon visible in the plot by colouring the polygon are with c. 85 % t
 67. "Wouldn't it be cleaner to have all necessary scripts in scripts -directory (and perhaps the optional in dev_tools folder or optionally remove them totally)?!"
 
 68. "Implement the full migration!"
+
+69. "Please do and after that lets verify that the whole codebase is producing the expected results(plots!)"
+
+70. "I think the COMPLETION summaries are not needed in the final version of the project? What do you think?"
+
+71. "Move to docs/session_archive and commit!"

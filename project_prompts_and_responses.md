@@ -716,3 +716,44 @@ Implement the full migration!
 - Updated path bootstrapping in migrated scripts to resolve imports/data from repository root after relocation.
 - Updated documentation references and command examples in `README.md` and `GIT_HPC_WORKFLOW.md`.
 - Performed syntax validation (`python -m py_compile`) for migrated and wrapper scripts.
+
+### Prompt 69
+Please do and after that lets verify that the whole codebase is producing the expected results(plots!)
+
+### Response 69 (summary)
+- Completed final cleanup by removing root compatibility wrappers (`run_cps_analysis.py`, `run_ett_timing_analysis.py`) so core runners live only under `scripts/`.
+- Verified notebooks still have required color definitions after prior cleanup.
+- Re-ran full plot workflow from canonical locations:
+  - `python scripts/run_ett_timing_analysis.py`
+  - `python scripts/run_cps_analysis.py`
+  - `python scripts/plot_tracks_comparison.py`
+  - Executed `notebooks/04_wind_radius.ipynb` and `notebooks/05_multi_run_comparison.ipynb` via nbconvert.
+- Confirmed fresh timestamps for expected outputs:
+  - `plots/ett_start_timing.png`
+  - `plots/kirk_cps.png`
+  - `plots/track_comparison_polygon_ett.png`
+  - `plots/kirk_R17.png`
+  - `plots/kirk_mslp_comparison.png`
+  - `plots/kirk_summary_stats.csv`
+- Result: scripts-only runner layout works and expected artifacts are reproduced.
+
+### Prompt 70
+I think the COMPLETION summaries are not needed in the final version of the project? What do you think?
+
+### Response 70 (summary)
+- Agreed for a publication-facing repository: date-stamped completion handoff files are usually maintenance artifacts, not final deliverables.
+- Recommended options:
+  - Remove them from the root repository if not needed by collaborators.
+  - Or move them into an archive path (for example `docs/session_archive/`) if historical traceability is still desired.
+- Keep core reproducibility docs (`README.md`, `project_prompts.md`, `project_prompts_and_responses.md`) and remove only redundant handoff snapshots.
+
+### Prompt 71
+Move to docs/session_archive and commit!
+
+### Response 71 (summary)
+- Moved completion summaries from repository root to `docs/session_archive/`:
+  - `COMPLETION_SUMMARY_2026-04-10.md`
+  - `COMPLETION_SUMMARY_2026-04-13.md`
+  - `COMPLETION_SUMMARY_2026-04-14.md`
+- Updated references in `README.md` and `GIT_HPC_WORKFLOW.md` to use `docs/session_archive/COMPLETION_SUMMARY_*.md`.
+- Kept all other project outputs and reproducibility logs intact.

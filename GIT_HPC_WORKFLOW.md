@@ -16,7 +16,7 @@ git status
 
 If that works, proceed with commit:
 ```bash
-git add project_prompts.md project_prompts_and_responses.md COMPLETION_SUMMARY_*.md README.md scripts/run_cps_analysis.py notebooks/05_multi_run_comparison.ipynb
+git add project_prompts.md project_prompts_and_responses.md docs/session_archive/COMPLETION_SUMMARY_*.md README.md scripts/run_cps_analysis.py notebooks/05_multi_run_comparison.ipynb
 git commit -m "Session Apr 13: unified colors, robust IBTrACS, -3K experiments, CPS annotations"
 git push
 ```
@@ -45,7 +45,7 @@ git --version  # Should show: git version 2.40.0
 ## Files Modified for This Setup
 - **`.project_setup.sh`** – Auto-load script (already created)
 - **`README.md`** – Updated "At Session End" with git instructions
-- **`COMPLETION_SUMMARY_2026-04-13.md`** – Detailed git workflow guide
+- **`docs/session_archive/COMPLETION_SUMMARY_2026-04-13.md`** – Detailed git workflow guide
 
 ## Context
 - HPC: Mahti (CSC)
