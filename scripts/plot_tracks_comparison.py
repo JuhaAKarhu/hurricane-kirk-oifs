@@ -15,10 +15,12 @@ import glob
 import os
 import sys
 
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import xarray as xr
 from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
 from matplotlib.legend_handler import HandlerTuple
 
 sys.path.insert(0, os.path.dirname(__file__))
@@ -79,8 +81,8 @@ def main() -> None:
     )
     parser.add_argument(
         "--output",
-        default="plots/track_comparison.png",
-        help="Output PNG path (default: plots/track_comparison.png)",
+        default="plots/track_comparison_polygon_ett.png",
+        help="Output PNG path (default: plots/track_comparison_polygon_ett.png)",
     )
     parser.add_argument(
         "--no-best-track",
@@ -100,6 +102,16 @@ def main() -> None:
     )
     args = parser.parse_args()
 
+    # Load ETT start times for model runs
+    ett_csv = os.path.join(os.path.dirname(os.path.dirname(__file__)), "plots", "tracks", "ett_start_summary.csv")
+    ett_start_times = {}
+    if os.path.exists(ett_csv):
+        ett_df = pd.read_csv(ett_csv)
+        for _, row in ett_df.iterrows():
+            ett_start_times[row["run"]] = pd.Timestamp(row["et_start_time_utc"])
+    # Best-track ETT start: 6 Oct 1800 UTC (user-specified)
+    BT_ETT_TIME = pd.Timestamp("2024-10-06T18:00:00")
+
     pattern = os.path.join(args.tracks_dir, "track_*.nc")
     files = sorted(glob.glob(pattern))
 
@@ -110,6 +122,8 @@ def main() -> None:
 
     plt.figure(figsize=(10, 8))
     all_track_times = []
+    all_lons = []
+    all_lats = []
     run_legend_items = []
     title_fs = 24
     axis_label_fs = 22
@@ -124,6 +138,30 @@ def main() -> None:
         "+6K": "tab:red",
     }
 
+    # Polygon enclosing the SST-perturbation area (-3K/+3K/+6K initial SST edits).
+    # Coordinates are in lon/lat with western longitudes as negative values.
+    polygon_lons = np.array([
+        -30.0, -45.0, -55.0, -60.0, -55.0, -35.0,
+        -15.0, -15.0, -35.0, -40.0, -35.0, -22.5,
+    ])
+    polygon_lats = np.array([
+        10.0, 10.0, 20.0, 30.0, 40.0, 50.0,
+        50.0, 35.0, 35.0, 30.0, 22.5, 17.5,
+    ])
+
+    plt.fill(
+        polygon_lons,
+        polygon_lats,
+        facecolor="gray",
+        edgecolor="dimgray",
+        linewidth=1.3,
+        alpha=0.15,
+        zorder=1,
+    )
+
+    all_lons.extend(polygon_lons.tolist())
+    all_lats.extend(polygon_lats.tolist())
+
     for path in files:
         ds = xr.open_dataset(path)
         if "lon" not in ds or "lat" not in ds:
@@ -132,6 +170,9 @@ def main() -> None:
 
         if "time" in ds:
             all_track_times.extend(pd.to_datetime(ds["time"].values))
+
+        all_lons.extend(ds["lon"].values.astype(float).tolist())
+        all_lats.extend(ds["lat"].values.astype(float).tolist())
 
         label = label_from_filename(path)
         line_color = track_colors.get(label, "tab:gray")
@@ -153,6 +194,22 @@ def main() -> None:
             ),
             label,
         ))
+
+        # Mark ETT start time with a large marker
+        if label in ett_start_times and "time" in ds:
+            times_all = pd.to_datetime(ds["time"].values)
+            ett_t = ett_start_times[label]
+            ett_idx = int(np.argmin(np.abs(times_all - ett_t)))
+            plt.scatter(
+                float(ds["lon"].values[ett_idx]),
+                float(ds["lat"].values[ett_idx]),
+                s=260,
+                marker="o",
+                color=line_color,
+                edgecolors="black",
+                linewidth=1.2,
+                zorder=8,
+            )
 
         # Mark one labeled point per day, preferring --label-hour UTC.
         if "time" in ds:
@@ -198,6 +255,8 @@ def main() -> None:
         bt_times = pd.to_datetime(bt.time.values)
         bt_lon = ((bt.lon.values.astype(float) + 180.0) % 360.0) - 180.0
         bt_lat = bt.lat.values.astype(float)
+        all_lons.extend(bt_lon.tolist())
+        all_lats.extend(bt_lat.tolist())
         plt.plot(
             bt_lon,
             bt_lat,
@@ -250,12 +309,36 @@ def main() -> None:
                     f"-> lon={bt_lon[i]:.2f}, lat={bt_lat[i]:.2f}"
                 )
 
+        # Mark best-track ETT start with a large marker
+        bt_ett_diffs = np.abs(bt_times - BT_ETT_TIME)
+        bt_ett_idx = int(np.argmin(bt_ett_diffs))
+        plt.scatter(
+            bt_lon[bt_ett_idx],
+            bt_lat[bt_ett_idx],
+            s=280,
+            marker="x",
+            color="black",
+            linewidths=2.5,
+            zorder=12,
+        )
+
     plt.title("Hurricane Kirk OIFS Track Comparison with Timesteps", fontsize=title_fs)
     plt.xlabel("Longitude (deg)", fontsize=axis_label_fs)
     plt.ylabel("Latitude (deg)", fontsize=axis_label_fs)
     plt.xticks(fontsize=tick_fs)
     plt.yticks(fontsize=tick_fs)
     plt.grid(True, alpha=0.3)
+
+    if all_lons and all_lats:
+        lon_min = min(all_lons) - 2.0
+        lon_max = max(all_lons) + 2.0
+        lat_min = min(all_lats) - 2.0
+        lat_max = max(all_lats) + 2.0
+        # Keep the requested map extension to include SST polygon context.
+        lon_min = min(lon_min, -65.0)
+        lat_min = min(lat_min, 5.0)
+        plt.xlim(lon_min, lon_max)
+        plt.ylim(lat_min, lat_max)
 
     legend_handles = [h for h, _ in run_legend_items]
     legend_labels = [lbl for _, lbl in run_legend_items]
@@ -266,9 +349,14 @@ def main() -> None:
         )
         legend_labels.append("Best track (archive)")
 
-    # Text-only legend note.
+    legend_handles.append(Patch(facecolor="gray", edgecolor="dimgray", alpha=0.15))
+    legend_labels.append("SST-perturbation polygon")
+
+    # Text-only legend notes.
     legend_handles.append(Line2D([], [], linestyle="None", marker=None, color="none"))
     legend_labels.append("(big dots and crosses at 12UTC)")
+    legend_handles.append(Line2D([], [], linestyle="None", marker=None, color="none"))
+    legend_labels.append("(biggest markers at ETT start time)")
 
     leg = plt.legend(
         legend_handles,
@@ -278,8 +366,9 @@ def main() -> None:
         frameon=True,
         handler_map={tuple: HandlerTuple(ndivide=None, pad=0.4)},
     )
-    # Make the explanatory note smaller than the run labels.
+    # Make the explanatory notes smaller than the run labels.
     leg.get_texts()[-1].set_fontsize(int(round(legend_fs * 0.75)))
+    leg.get_texts()[-2].set_fontsize(int(round(legend_fs * 0.75)))
     plt.tight_layout()
     plt.savefig(args.output, dpi=170, bbox_inches="tight")
 

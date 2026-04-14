@@ -596,3 +596,20 @@ commit!
 ### Response 56 (summary)
 - Updated `project_prompts.md` and `project_prompts_and_responses.md` with prompts 53–56.
 - Committed all uncommitted changes with message: "Session Apr 14 (cont): ETT-start markers on CPS/MSLP/R17 plots, recovery and re-run of stale kirk_cps.png".
+
+### Prompt 57
+Next, replot the /users/jfkarhu/Numlab/hurricane_kirk/plots/track_comparison.png with different name with the ETT start times displayed with big markers as in other comparison plots. For the best track, use the following timestep as the ETT start time: 6 Oct 1800 UTC. Add one more explanatory text to the legend box saying "(biggest markers at ETT start time)".
+
+### Response 57 (summary)
+- Updated `scripts/plot_tracks_comparison.py` to add ETT-start markers for model runs from `plots/tracks/ett_start_summary.csv` and a best-track ETT marker at 2024-10-06 18:00 UTC.
+- Added a new legend explanatory line: "(biggest markers at ETT start time)".
+- Generated `plots/track_comparison_ett.png`.
+
+### Prompt 58
+You should apply the ETT markers to the latest version of the plot where the polygon of the perturbed SSTs is displayed. Please, correct!
+
+### Response 58 (summary)
+- Restored SST-perturbation polygon plotting in the latest `scripts/plot_tracks_comparison.py` workflow (filled gray polygon + outline).
+- Kept and validated ETT-start markers for all runs and the best track in the same figure code path.
+- Added/kept legend entries for both SST polygon and ETT marker explanation.
+- Regenerated corrected output as `plots/track_comparison_polygon_ett.png`.

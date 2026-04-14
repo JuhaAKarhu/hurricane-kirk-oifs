@@ -169,3 +169,7 @@ Make the polygon visible in the plot by colouring the polygon are with c. 85 % t
 55. "Yes, please! [verify plots and re-run stale CPS plot]"
 
 56. "commit!"
+
+57. "Next, replot the /users/jfkarhu/Numlab/hurricane_kirk/plots/track_comparison.png with different name with the ETT start times displayed with big markers as in other comparison plots. For the best track, use the following timestep as the ETT start time: 6 Oct 1800 UTC. Add one more explanatory text to the legend box saying \"(biggest markers at ETT start time)\"."
+
+58. "You should apply the ETT markers to the latest version of the plot where the polygon of the perturbed SSTs is displayed. Please, correct!"
