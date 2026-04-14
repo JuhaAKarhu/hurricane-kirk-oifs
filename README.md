@@ -19,6 +19,70 @@ Ribberink et al. (2025) methods and code interfaces from `ribberink_code/`.
 - **Output frequency**: 3-hourly (`+000012` in file names means 12 model steps = 3 h at 15 min timestep)
 - **Forecast length**: ~576 h (baserun), ~264 h (SST runs)
 
+## Start Here (Mahti User Workflow)
+
+This section is the fastest path to run the repository if you have access to Mahti and the
+OpenIFS output directories listed above.
+
+### 1. Minimal setup
+
+```bash
+cd /users/jfkarhu/Numlab/hurricane_kirk
+source .venv/bin/activate
+source .project_setup.sh
+module load eccodes
+```
+
+### 2. Fixed paths for this repository
+
+This repository is configured to reproduce the same Hurricane Kirk dataset on Mahti.
+In normal use, do **not** edit paths or initialization time.
+
+Path and timing constants are intentionally fixed in `scripts/oifs_adapter.py`:
+- `MAHTI_BASE`
+- `GRIDDED_Z_BASE`
+- `INIT_DATETIME`
+
+Before running, just verify access to those fixed paths:
+
+```bash
+ls /scratch/project_2001271/vasiakan/oifs_expt/kirk/T639L91/2024100306/int_exp_1003 | head
+ls /scratch/project_2001271/jfkarhu/cps_z_gridded/baserun | head
+```
+
+If these checks fail, the issue is typically permissions or filesystem availability, not a repository configuration issue.
+
+### 3. Recommended run order
+
+```bash
+# 1) Track files (required by all downstream diagnostics)
+python scripts/run_track.py
+
+# 2) ETT timing (produces ett_start_summary.csv used by marker overlays)
+python scripts/run_ett_timing_analysis.py
+
+# 3) CPS figure
+python scripts/run_cps_analysis.py
+
+# 4) Track comparison plot (with polygon + ETT markers)
+python scripts/plot_tracks_comparison.py
+
+# 5) Execute notebook analyses that generate remaining comparison figures
+python -m jupyter nbconvert --execute --to notebook --inplace notebooks/04_wind_radius.ipynb
+python -m jupyter nbconvert --execute --to notebook --inplace notebooks/05_multi_run_comparison.ipynb
+```
+
+### 4. Typical hiccups and fixes
+
+- `RuntimeError ... spectral format (no lat/lon coordinates)` in CPS:
+  run `scripts/convert_spectral_to_grid.sh` and ensure `GRIDDED_Z_BASE` points to the converted files.
+- `git: command not found` on Mahti:
+  run `source .project_setup.sh` before git commands.
+- `cartopy` missing:
+  notebook 05 falls back to plain axes for map plotting, but install cartopy for full map rendering.
+- IBTrACS file not found:
+  ensure `data/IBTrACS.NA.v04r01.nc` exists (see setup section below).
+
 ## OIFS Output Files
 
 Each run directory contains three GRIB file types per timestep:

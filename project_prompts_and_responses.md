@@ -776,3 +776,32 @@ Patch the Readme file, but lets track the plots and include them to commit and f
 - Updated README wording to state selected plot products are tracked for reproducibility.
 - Updated `.gitignore` by removing `plots/*.png`, `plots/*.pdf`, and `plots/*.svg` ignore rules so plot images can be committed.
 - Prepared repository to include current plot figures in commit.
+
+### Prompt 74
+Please check that requirements.txt is up to date!
+
+### Response 74 (summary)
+- Audited `requirements.txt` against imports in project scripts and notebooks.
+- Confirmed required third-party packages are covered: `numpy`, `pandas`, `xarray`, `matplotlib`, `cfgrib`, `eccodes`, `haversine`, `cartopy`, `jupyter`, `notebook`.
+- Verified no missing runtime dependencies from active code paths; remaining imports outside requirements are from Python standard library.
+- `scipy` remains reasonable to keep because it appears in legacy/reference notebooks under `ribberink_code/`.
+- Conclusion: `requirements.txt` is up to date for current project workflow.
+
+### Prompt 75
+Let's assume that the user of the repo is someone who has access to Mahti and the datafiles... The Readme files should instruct the user how to run the code, where to start and what (if any) is necessary to change (paths?, which?) and what kind of hickups possibly to expect.
+
+### Response 75 (summary)
+- Added an early `Start Here (Mahti User Workflow)` section to `README.md`.
+- Included:
+  - minimal setup commands (`.venv`, `.project_setup.sh`, `module load eccodes`),
+  - exact configurable path variables in `scripts/oifs_adapter.py` (`MAHTI_BASE`, `GRIDDED_Z_BASE`, optional `INIT_DATETIME`),
+  - recommended execution order of scripts/notebooks,
+  - common failure modes and practical fixes (spectral `z` conversion, git module path, cartopy fallback, IBTrACS file availability).
+
+### Prompt 76
+What do you mean by optional? The init time is fixed with the data files. This repo is not intended to be used for other data, the instruction should focus on how to reproduce the files (verify them) with the same data.
+
+### Response 76 (summary)
+- Clarified README to fixed-data reproducibility mode for Mahti.
+- Replaced path-edit guidance with explicit instruction to keep `MAHTI_BASE`, `GRIDDED_Z_BASE`, and `INIT_DATETIME` unchanged.
+- Added path-access verification commands and reframed failures as environment/access issues rather than configuration customization.

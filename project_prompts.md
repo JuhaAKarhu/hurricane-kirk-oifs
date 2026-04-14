@@ -203,3 +203,9 @@ Make the polygon visible in the plot by colouring the polygon are with c. 85 % t
 72. "Let's consider the README.md file. Do you think it is uptodate and reflect the current status of the project? Please check!"
 
 73. "Patch the Readme file, but lets track the plots and include them to commit and final repo."
+
+74. "Please check that requirements.txt is up to date!"
+
+75. "Let's assume that the user of the repo is someone who has access to Mahti and the datafiles... The Readme files should instruct the user how to run the code, where to start and what (if any) is necessary to change (paths?, which?) and what kind of hickups possibly to expect."
+
+76. "What do you mean by optional? The init time is fixed with the data files. This repo is not intended to be used for other data, the instruction should focus on how to reproduce the files (verify them) with the same data."
