@@ -159,3 +159,13 @@ Make the polygon visible in the plot by colouring the polygon are with c. 85 % t
 50. "Go on with the recommended next steps!"
 
 51. "The plot /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_R17.png should be redrawn with max y-range 3000 km. the last timestep value of +3K run should be allowed to overshoot!"
+
+52. "To plots /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_cps.png /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_mslp_comparison.png /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_R17.png add a bigger marker to denote the the ETT start time for each simulation. Use the same colorcoding just bigger mark for the start time. Get the ETT start times for each run from the ETT start time analysis."
+
+53. "Check /users/jfkarhu/Numlab/hurricane_kirk/README.md, /users/jfkarhu/Numlab/hurricane_kirk/COMPLETION_SUMMARY_2026-04-14.md and /users/jfkarhu/Numlab/hurricane_kirk/project_prompts_and_responses.md to see where we left the last time session ended in controlled way or the last commit was made. Bear in mind though that some files may have been altered after the last commit as the last session was interrupted abruptly!"
+
+54. "you should run .project_setup.sh to make git available, I believe!"
+
+55. "Yes, please! [verify plots and re-run stale CPS plot]"
+
+56. "commit!"

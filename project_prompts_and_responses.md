@@ -542,3 +542,57 @@ The plot /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_R17.png should be redra
 - Modified Cell 9 in `notebooks/04_wind_radius.ipynb`: added `ax.set_ylim(0, 3000)` and `clip_on=(run_name != '+3K')` so the +3K final value renders above the y-axis limit.
 - Re-executed full notebook via `jupyter nbconvert --execute`.
 - `plots/kirk_R17.png` regenerated at 19:11 (file grew 83→118 KB reflecting overshoot content).
+
+### Prompt 52
+To plots /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_cps.png /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_mslp_comparison.png /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_R17.png add a bigger marker to denote the the ETT start time for each simulation. Use the same colorcoding just bigger mark for the start time. Get the ETT start times for each run from the ETT start time analysis.
+
+### Response 52 (summary)
+- Added ETT-start markers to all three requested plots using times from `plots/tracks/ett_start_summary.csv`.
+- `run_cps_analysis.py`:
+  - Loads ETT start times from CSV.
+  - Marks nearest CPS point to each run's ETT start with a larger same-color marker (black edge) on both CPS panels.
+- `notebooks/05_multi_run_comparison.ipynb` (MSLP plot cell):
+  - Loads ETT start times from CSV.
+  - Marks nearest MSLP point to each run's ETT start with a larger same-color marker.
+- `notebooks/04_wind_radius.ipynb` (R17 plot cell):
+  - Loads ETT start times from CSV.
+  - Marks nearest R17 point to each run's ETT start with a larger same-color marker.
+- Regenerated outputs:
+  - `plots/kirk_cps.png`
+  - `plots/kirk_mslp_comparison.png`
+  - `plots/kirk_R17.png`
+
+---
+## Session: April 14, 2026 (continuation / recovery)
+
+### Prompt 53
+Check /users/jfkarhu/Numlab/hurricane_kirk/README.md, /users/jfkarhu/Numlab/hurricane_kirk/COMPLETION_SUMMARY_2026-04-14.md and /users/jfkarhu/Numlab/hurricane_kirk/project_prompts_and_responses.md to see where we left the last time session ended in controlled way or the last commit was made. Bear in mind though that some files may have been altered after the last commit as the last session was interrupted abruptly!
+
+### Response 53 (summary)
+- Read README.md, COMPLETION_SUMMARY_2026-04-14.md, and end of project_prompts_and_responses.md.
+- Identified last commit: `bbffdba` — prompts 49–51 (wind-radius colors, R17 ylim/overshoot).
+- Found 5 uncommitted files: `notebooks/04_wind_radius.ipynb`, `notebooks/05_multi_run_comparison.ipynb`, `run_cps_analysis.py`, `project_prompts.md`, `project_prompts_and_responses.md` — all from prompt 52 ETT-marker work.
+- Reported status to user and asked whether to verify plots and re-run stale ones.
+
+### Prompt 54
+you should run .project_setup.sh to make git available, I believe!
+
+### Response 54 (summary)
+- Sourced `.project_setup.sh` to add git to PATH.
+- Ran `git log --oneline -10` to confirm last commit and history.
+
+### Prompt 55
+Yes, please! [verify plots and re-run stale CPS plot]
+
+### Response 55 (summary)
+- Checked timestamps on all three target plots vs. source file modification times.
+- Found `kirk_cps.png` (21:33) was stale — `run_cps_analysis.py` was modified at 21:38 after the plot was generated.
+- `kirk_mslp_comparison.png` (21:43) and `kirk_R17.png` (21:54) were OK — notebook cells confirmed executed with ETT code.
+- Re-ran `run_cps_analysis.py`; `plots/kirk_cps.png` regenerated at 22:11 with ETT-start markers.
+
+### Prompt 56
+commit!
+
+### Response 56 (summary)
+- Updated `project_prompts.md` and `project_prompts_and_responses.md` with prompts 53–56.
+- Committed all uncommitted changes with message: "Session Apr 14 (cont): ETT-start markers on CPS/MSLP/R17 plots, recovery and re-run of stale kirk_cps.png".

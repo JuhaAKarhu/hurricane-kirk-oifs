@@ -15,6 +15,23 @@ from oifs_adapter import RUNS, OIFSRun, gridded_z_dir
 import hurricane_functions as hf
 
 
+def load_ett_start_times(base_dir):
+    """Load per-run ETT start timestamps from analysis summary CSV."""
+    path = os.path.join(base_dir, 'plots/tracks/ett_start_summary.csv')
+    starts = {}
+    if not os.path.exists(path):
+        print(f'WARNING: ETT summary not found: {path}')
+        return starts
+
+    df = pd.read_csv(path)
+    for _, row in df.iterrows():
+        run_name = str(row.get('run', ''))
+        t_val = row.get('et_start_time_utc', '')
+        if run_name and isinstance(t_val, str) and t_val.strip():
+            starts[run_name] = pd.Timestamp(t_val)
+    return starts
+
+
 def run_name_to_safe(run_name):
     """Encode run names for file paths (+3K -> p3K, -3K -> m3K)."""
     return run_name.replace('+', 'p').replace('-', 'm')
@@ -85,6 +102,7 @@ colors = {
     '+3K': 'tab:orange',
     '+6K': 'tab:red',
 }
+ett_start_times = load_ett_start_times(_HERE)
 
 fig, axes = plt.subplots(1, 2, figsize=(14, 6))
 
@@ -133,6 +151,23 @@ for ax_idx, (ax, vt_key, title) in enumerate([
                         color=colors.get(run_name, 'k'),
                         alpha=0.9,
                     )
+
+            # Mark ET-transition start time with a larger same-color marker.
+            et_t = ett_start_times.get(run_name)
+            if et_t is not None and len(t_plot) > 0:
+                t_ns = t_plot.to_numpy(dtype='datetime64[ns]')
+                et_ns = np.datetime64(et_t.to_datetime64(), 'ns')
+                idx_et = int(np.abs(t_ns - et_ns).argmin())
+                ax.scatter(
+                    b_plot[idx_et],
+                    vt_plot[idx_et],
+                    s=170,
+                    marker='o',
+                    c=colors.get(run_name, 'k'),
+                    edgecolors='k',
+                    linewidths=0.8,
+                    zorder=6,
+                )
             plot_count += valid_mask.sum()
         else:
             print(f'WARNING: No valid CPS points for {run_name} on {vt_key}')
