@@ -179,3 +179,5 @@ Make the polygon visible in the plot by colouring the polygon are with c. 85 % t
 60. "Do the cleanup for notebook 3 and do similar tasks to notebooks 4 and 5, too, cause there seem to be similar warnings!"
 
 61. "Let's clean the codebase further. The plots /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_cps_overlay.png /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_track_comparison.png /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_windradius_EW.png /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_windradius_NS.png /users/jfkarhu/Numlab/hurricane_kirk/plots/track_comparison_ett.png are not needed. Clean up the codebase from all notebook and script content that is related to plotting of those plots."
+
+62. "Let's run the whole codebase in order to check, whether the needed plots are reproduced as earlier."
