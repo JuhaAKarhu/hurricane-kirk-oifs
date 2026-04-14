@@ -173,3 +173,7 @@ Make the polygon visible in the plot by colouring the polygon are with c. 85 % t
 57. "Next, replot the /users/jfkarhu/Numlab/hurricane_kirk/plots/track_comparison.png with different name with the ETT start times displayed with big markers as in other comparison plots. For the best track, use the following timestep as the ETT start time: 6 Oct 1800 UTC. Add one more explanatory text to the legend box saying \"(biggest markers at ETT start time)\"."
 
 58. "You should apply the ETT markers to the latest version of the plot where the polygon of the perturbed SSTs is displayed. Please, correct!"
+
+59. "[Conversation handoff summary] The notebook 03 CPS output contains massive repeated warnings and recurring errors like 'Dataset object has no attribute lat'; is this output necessary for a final sealed/published repository, or can most/all of it be discarded?"
+
+60. "Do the cleanup for notebook 3 and do similar tasks to notebooks 4 and 5, too, cause there seem to be similar warnings!"

@@ -613,3 +613,21 @@ You should apply the ETT markers to the latest version of the plot where the pol
 - Kept and validated ETT-start markers for all runs and the best track in the same figure code path.
 - Added/kept legend entries for both SST polygon and ETT marker explanation.
 - Regenerated corrected output as `plots/track_comparison_polygon_ett.png`.
+
+### Prompt 59
+[Conversation handoff summary] The notebook 03 CPS output contains massive repeated warnings and recurring errors like 'Dataset object has no attribute lat'; is this output necessary for a final sealed/published repository, or can most/all of it be discarded?
+
+### Response 59 (summary)
+- No, the huge warning/error cell outputs are not necessary for a final publication-quality repository and should usually be removed from committed notebook output.
+- Keep only clean outputs that communicate scientific results (final figures/tables), and keep reproducibility in scripts, environment files, and prompt logs rather than in noisy notebook stderr spam.
+- Suggested publication policy: clear notebook outputs before commit by default; optionally keep one archived diagnostic artifact (or separate debug log file) only if strict audit traceability is required.
+- The repeated `FutureWarning` blocks are non-essential noise, while the recurring `AttributeError: 'Dataset' object has no attribute 'lat'` indicates a real bug that should be fixed in code, not preserved as notebook output.
+
+### Prompt 60
+Do the cleanup for notebook 3 and do similar tasks to notebooks 4 and 5, too, cause there seem to be similar warnings!
+
+### Response 60 (summary)
+- Cleared all cell outputs from `notebooks/03_cps_analysis.ipynb`, `notebooks/04_wind_radius.ipynb`, and `notebooks/05_multi_run_comparison.ipynb` using Python JSON processing.
+- Preserved all code cells and notebook structure; only outputs (warnings, errors, stdout/stderr) were removed.
+- File size reduction: notebook 04 reduced by 26K+ lines, confirming successful removal of warning spam.
+- All three notebooks now show as modified: `M notebooks/03_cps_analysis.ipynb`, `M notebooks/04_wind_radius.ipynb`, `M notebooks/05_multi_run_comparison.ipynb`.
