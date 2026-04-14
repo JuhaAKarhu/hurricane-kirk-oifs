@@ -757,3 +757,22 @@ Move to docs/session_archive and commit!
   - `COMPLETION_SUMMARY_2026-04-14.md`
 - Updated references in `README.md` and `GIT_HPC_WORKFLOW.md` to use `docs/session_archive/COMPLETION_SUMMARY_*.md`.
 - Kept all other project outputs and reproducibility logs intact.
+
+### Prompt 72
+Let's consider the README.md file. Do you think it is uptodate and reflect the current status of the project? Please check!
+
+### Response 72 (summary)
+- Checked README against current repository layout, recent migration commits, and generated outputs.
+- Found stale status lines in README claiming CPS/wind-radius outputs are still pending/missing.
+- Found structure drift: README tree omits `docs/session_archive/` despite summaries being moved there.
+- Found wording mismatch: README says `plots/` outputs are not committed, but tracked CSV outputs exist under `plots/` and `plots/tracks/`.
+- Recommendation: refresh the status snapshot and project-structure sections to match current scripts-only runner layout and latest verified outputs.
+
+### Prompt 73
+Patch the Readme file, but lets track the plots and include them to commit and final repo.
+
+### Response 73 (summary)
+- Updated `README.md` to reflect current verified status (CPS and R17 completed/validated), latest output artifacts, and updated project structure including `docs/session_archive/`.
+- Updated README wording to state selected plot products are tracked for reproducibility.
+- Updated `.gitignore` by removing `plots/*.png`, `plots/*.pdf`, and `plots/*.svg` ignore rules so plot images can be committed.
+- Prepared repository to include current plot figures in commit.

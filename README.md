@@ -71,18 +71,18 @@ Primary reused code is in `ribberink_code/hurricane_functions.py`:
 
 ### CPS analysis (core project axis)
 
-- Status: **method implemented, execution/validation pending in current workspace state**
+- Status: **completed and validated**
 - Implemented in `notebooks/03_cps_analysis.ipynb` and `scripts/run_cps_analysis.py`
 - Uses OIFS geopotential-height conversion in `scripts/oifs_adapter.py` and Ribberink `hart`
-- Current repository `plots/` does not yet contain `kirk_cps.png`, so final CPS figures should be regenerated and checked
+- Verified output: `plots/kirk_cps.png`
 
 ### Core radius / wind-radius analysis
 
-- Status: **implemented and extended with direction-aware metrics; validation plots still pending**
-- Implemented in `notebooks/04_wind_radius.ipynb` (storm-relative E-W/N-S slices, threshold contours, R17 time series)
+- Status: **completed and validated**
+- Implemented in `notebooks/04_wind_radius.ipynb` (R17 time series) and directional core-radius CSV workflow
 - Batch script implemented in `scripts/core_radius_metrics.py` for directional + mean radius metrics
 - Outputs: `plots/tracks/core_radius_<run>.csv` and `plots/tracks/core_radius_summary.csv`
-- Current repository `plots/` does not yet contain `kirk_windradius_*.png` or `kirk_R17.png`
+- Verified output: `plots/kirk_R17.png`
 
 ### Session handoff (2026-04-10, end of day)
 
@@ -103,6 +103,15 @@ Suggested restart sequence:
 2. `source .venv/bin/activate`
 3. If needed, rerun `python scripts/run_ett_timing_analysis.py`
 4. Continue with `notebooks/05_multi_run_comparison.ipynb`
+
+### Latest verified outputs (April 2026)
+
+- `plots/ett_start_timing.png`
+- `plots/kirk_cps.png`
+- `plots/track_comparison_polygon_ett.png`
+- `plots/kirk_R17.png`
+- `plots/kirk_mslp_comparison.png`
+- `plots/kirk_summary_stats.csv`
 
 ## Session Workflow & Reproducibility
 
@@ -200,8 +209,10 @@ hurricane_kirk/
 ├── dev_tools/                     # Optional diagnostics and ad hoc sanity checks
 │   ├── diag_grib_coords.py
 │   └── test_hart_minimal.py
+├── docs/
+│   └── session_archive/           # Archived session handoff summaries
 ├── ribberink_code/                # Cloned from MRibberink/OpheliaPaperCode
-├── plots/                         # Output figures (not committed)
+├── plots/                         # Output figures and tracked CSV diagnostics
 ├── data/                          # IBTrACS file (not committed, too large)
 ├── .gitignore
 ├── project_prompts.md             # Prompt-only reproducibility log
@@ -266,6 +277,7 @@ python scripts/plot_tracks_comparison.py --label-hour 12
 ## Version Control
 
 This project is tracked with Git. Large data files (GRIB, NetCDF) are excluded via `.gitignore`.
+Selected plot products (PNG) and diagnostic CSV outputs are tracked for reproducibility.
 
 ```bash
 # First-time GitHub setup (replace YOUR_USERNAME with your GitHub username):

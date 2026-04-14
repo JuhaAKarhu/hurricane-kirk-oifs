@@ -199,3 +199,7 @@ Make the polygon visible in the plot by colouring the polygon are with c. 85 % t
 70. "I think the COMPLETION summaries are not needed in the final version of the project? What do you think?"
 
 71. "Move to docs/session_archive and commit!"
+
+72. "Let's consider the README.md file. Do you think it is uptodate and reflect the current status of the project? Please check!"
+
+73. "Patch the Readme file, but lets track the plots and include them to commit and final repo."

@@ -6,9 +6,6 @@
 *.h5
 *.hdf
 data/
-plots/*.png
-plots/*.pdf
-plots/*.svg
 
 # Python
 __pycache__/
