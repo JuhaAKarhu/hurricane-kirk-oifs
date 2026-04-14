@@ -631,3 +631,14 @@ Do the cleanup for notebook 3 and do similar tasks to notebooks 4 and 5, too, ca
 - Preserved all code cells and notebook structure; only outputs (warnings, errors, stdout/stderr) were removed.
 - File size reduction: notebook 04 reduced by 26K+ lines, confirming successful removal of warning spam.
 - All three notebooks now show as modified: `M notebooks/03_cps_analysis.ipynb`, `M notebooks/04_wind_radius.ipynb`, `M notebooks/05_multi_run_comparison.ipynb`.
+
+### Prompt 61
+Let's clean the codebase further. The plots /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_cps_overlay.png /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_track_comparison.png /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_windradius_EW.png /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_windradius_NS.png /users/jfkarhu/Numlab/hurricane_kirk/plots/track_comparison_ett.png are not needed. Clean up the codebase from all notebook and script content that is related to plotting of those plots.
+
+### Response 61 (summary)
+- Deleted 5 unused PNG plot files; confirmed via `rm -f` and git status.
+- Removed unused plot code from **notebook 04** (2 cells): Markdown section "## 3. Plot E-W and N-S wind radius for each run" + code cell producing `kirk_windradius_EW.png` and `kirk_windradius_NS.png`. Preserved R17 analysis (cell now #4 "R17 radius time series").
+- Removed unused plot code from **notebook 05** (4 cells): Markdown "## 2. Storm Track Map" + track plot code producing `kirk_track_comparison.png`, and markdown "## 4. Cyclone Phase Space Overlay" + CPS overlay code producing `kirk_cps_overlay.png`.
+- Updated notebook descriptions: notebook 04 now focuses on "R17 metric" and "direction-aware core-radius statistics"; notebook 05 now lists only "MSLP minimum time series" and "summary statistics table".
+- **Notebook 04**: 12 cells → 10 cells. **Notebook 05**: 13 cells → 9 cells. **Script**: `scripts/plot_tracks_comparison.py` already defaults to output `track_comparison_polygon_ett.png`.
+- All unused analysis removed; core reproducibility workflows preserved (R17, MSLP, core-radius, CPS via external run_cps_analysis.py, track via track_comparison_polygon_ett.png).

@@ -177,3 +177,5 @@ Make the polygon visible in the plot by colouring the polygon are with c. 85 % t
 59. "[Conversation handoff summary] The notebook 03 CPS output contains massive repeated warnings and recurring errors like 'Dataset object has no attribute lat'; is this output necessary for a final sealed/published repository, or can most/all of it be discarded?"
 
 60. "Do the cleanup for notebook 3 and do similar tasks to notebooks 4 and 5, too, cause there seem to be similar warnings!"
+
+61. "Let's clean the codebase further. The plots /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_cps_overlay.png /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_track_comparison.png /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_windradius_EW.png /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_windradius_NS.png /users/jfkarhu/Numlab/hurricane_kirk/plots/track_comparison_ett.png are not needed. Clean up the codebase from all notebook and script content that is related to plotting of those plots."
