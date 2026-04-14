@@ -129,6 +129,33 @@ Make the polygon visible in the plot by colouring the polygon are with c. 85 % t
 
 40. "For /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_cps.png apply the correct colour coding for the runs and add date and time annotation at 00UTC to the curves."
 
+## 2026-04-14
+
+41. "Can you confirm to me whether you are a GitHub Copilot CLI through my organization fmidev or an open, free version of Copilot?"
+
+42. "When clicking a profile icon in VS Code UI (left down corner) it shows JuhaAKarhu (GitHub). JuhaAKarhu is my acount which has in principal access to GitHub Copilot CLI through my organization fmidev."
+
+43. "Please, check those for me!"
+
+44. "Let's leave the Copilot licence issue for now. Please read /users/jfkarhu/Numlab/hurricane_kirk/README.md and the log file /users/jfkarhu/Numlab/hurricane_kirk/COMPLETION_SUMMARY_2026-04-13.md in order to now what the project is about and where we left last time."
+
+45. "I believe -3K did not appear due to this safe_name definition: \"safe_name = run_name.replace('+', 'p')\" which explicitly excluded minus mark and letter \"m\"!"
+
+46. "Can't you do something like: safe_name = run_name.replace('+', 'p'; '-','m') or similar with correct syntax? Wouldn't that fix the problem?"
+
+47. "Re-execute and re- validate wind-radius outputs from notebook 04."
+
+48. "please, patch!"
+
 41. "Let's wrap up for now! Please, update the log documents for smooth continuation of work next time, commit and push!"
 
 40. "For /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_cps.png apply the correct colour coding for the runs and add date and time annotation at 00UTC to the curves."
+
+---
+## Session: April 14, 2026
+
+49. "Read /users/jfkarhu/Numlab/hurricane_kirk/README.md to understand what the project is about and /users/jfkarhu/Numlab/hurricane_kirk/COMPLETION_SUMMARY_2026-04-13.md to understand where we left the last time of controlled end of session. Bear in mind that the last session was interrupted abruptly."
+
+50. "Go on with the recommended next steps!"
+
+51. "The plot /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_R17.png should be redrawn with max y-range 3000 km. the last timestep value of +3K run should be allowed to overshoot!"

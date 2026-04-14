@@ -419,6 +419,76 @@ Out-reverse the y-axis for kirk_mslp_comparison.png!
 ### Prompt 40
 For /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_cps.png apply the correct colour coding for the runs and add date and time annotation at 00UTC to the curves.
 
+## 2026-04-14
+
+### Prompt 41
+Can you confirm to me whether you are a GitHub Copilot CLI through my organization fmidev or an open, free version of Copilot?
+
+### Response 41 (summary)
+- Clarified that the session is GitHub Copilot in VS Code, not GitHub Copilot CLI.
+- Explained that account/org entitlement details are not exposed to me from inside the editor session, so I cannot directly verify whether access comes from `fmidev` or a free/personal plan.
+- Advised checking the signed-in GitHub account and Copilot subscription or organization seat assignment to confirm licensing source.
+
+### Prompt 42
+When clicking a profile icon in VS Code UI (left down corner) it shows JuhaAKarhu (GitHub). JuhaAKarhu is my acount which has in principal access to GitHub Copilot CLI through my organization fmidev.
+
+### Response 42 (summary)
+- Clarified that this confirms the signed-in GitHub identity used by VS Code is `JuhaAKarhu`.
+- Explained that this strongly suggests Copilot features in VS Code are using that GitHub account, but it still does not prove from editor UI alone whether the entitlement is specifically organization-provided or free/personal.
+- Recommended verifying the exact Copilot plan or assigned organization seat in GitHub account or organization settings if precise licensing source is important.
+
+### Prompt 43
+Please, check those for me!
+
+### Response 43 (summary)
+- Checked local shell and VS Code state to verify what can be confirmed directly from the environment.
+- Confirmed `github.copilot-chat` is installed in VS Code and the signed-in editor account is consistent with the user's report, but no local metadata exposed an `fmidev` organization entitlement or Copilot plan source.
+- Confirmed that the current shell does not have the real GitHub Copilot CLI installed; `copilot` resolves only to the VS Code Copilot shim, which reports that GitHub Copilot CLI is not installed and offers installation.
+- Concluded that the environment shows a signed-in GitHub-backed Copilot session in VS Code, but does not provide proof that the entitlement source is specifically the `fmidev` organization rather than another Copilot plan on the same account.
+
+### Prompt 44
+Let's leave the Copilot licence issue for now. Please read /users/jfkarhu/Numlab/hurricane_kirk/README.md and the log file /users/jfkarhu/Numlab/hurricane_kirk/COMPLETION_SUMMARY_2026-04-13.md in order to now what the project is about and where we left last time.
+
+### Response 44 (summary)
+- Read both `README.md` and `COMPLETION_SUMMARY_2026-04-13.md` to reconstruct project scope and latest handoff status.
+- Confirmed project focus is Hurricane Kirk multi-run OIFS analysis with Hart CPS as the primary diagnostic, supported by track and wind/core-radius analyses across `-3K`, `baserun`, `+3K`, and `+6K` runs.
+- Confirmed latest completed work includes unified run colors across plots, robust IBTrACS loading in notebook 05, inclusion of `-3K` in all comparison plots, CPS plot annotation enhancements, and regenerated key outputs.
+- Confirmed next pending work is wind-radius validation from notebook 04 plus final summary/publication-oriented synthesis outputs.
+
+### Prompt 45
+I believe -3K did not appear due to this safe_name definition: "safe_name = run_name.replace('+', 'p')" which explicitly excluded minus mark and letter "m"!
+
+### Response 45 (summary)
+- Confirmed the diagnosis is correct: `run_name.replace('+', 'p')` leaves `-3K` unmapped, so it does not resolve to `track_m3K.nc`.
+- Patched notebook 04 to use `run_name_to_safe(run_name)` in track loading, which maps `-3K -> m3K` and aligns with generated track filenames.
+- Verified in the project environment that `run_name_to_safe('-3K')` returns `m3K` and that `../plots/tracks/track_m3K.nc` exists.
+- Noted that if `-3K` still appears skipped in the current notebook kernel, a kernel restart and rerun of Cells 2–4 will refresh imported function state.
+
+### Prompt 46
+Can't you do something like: safe_name = run_name.replace('+', 'p'; '-','m') or similar with correct syntax? Wouldn't that fix the problem?
+
+### Response 46 (summary)
+- Confirmed the correct Python form is chained replacements: `run_name.replace('+', 'p').replace('-', 'm')`.
+- Updated notebook 04 Cell 4 to use the chained replacement for run-safe filenames.
+- Re-executed notebook Cells 2 and 4 and validated that all tracks now load, including `-3K` (output showed `Loaded: -3K`).
+
+### Prompt 47
+Re-execute and re- validate wind-radius outputs from notebook 04.
+
+### Response 47 (summary)
+- Restarted the notebook kernel and re-executed all code cells in `notebooks/04_wind_radius.ipynb` (setup, track loading, wind-slice computation, wind-radius plots, R17 plot, directional core-radius plots).
+- Validated that track loading now includes all four runs (`baserun`, `+3K`, `+6K`, `-3K`) and wind-slice computation completed for each run.
+- Confirmed output files were regenerated successfully on disk with fresh timestamps: `plots/kirk_windradius_EW.png`, `plots/kirk_windradius_NS.png`, and `plots/kirk_R17.png`.
+- Noted non-blocking xarray `FutureWarning` messages about `xr.concat` default `join` behavior; execution and outputs remained successful.
+
+### Prompt 48
+please, patch!
+
+### Response 48 (summary)
+- Patched notebook 04 wind-slice computation cell to set explicit `join='outer'` in both `xr.concat(...)` calls that build E-W and N-S time series.
+- Re-ran notebook setup, track loading, and wind-slice computation cells after the patch.
+- Confirmed all four runs load and process (`baserun`, `+3K`, `+6K`, `-3K`) with the patched workflow.
+
 ### Response 40 (summary)
 - Updated `run_cps_analysis.py` color mapping to match `scripts/plot_tracks_comparison.py`: `-3K`=tab:blue, `baserun`=tab:green, `+3K`=tab:orange, `+6K`=tab:red.
 - Added 00UTC date-time annotations (`MM-DD HHZ`) for CPS points on both upper and lower CPS panels.
@@ -439,3 +509,36 @@ For /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_cps.png apply the correct co
 - Updated `run_cps_analysis.py` color mapping to match `scripts/plot_tracks_comparison.py`: `-3K`=tab:blue, `baserun`=tab:green, `+3K`=tab:orange, `+6K`=tab:red.
 - Added 00UTC date-time annotations (`MM-DD HHZ`) for CPS points on both upper and lower CPS panels.
 - Re-ran `run_cps_analysis.py` and regenerated `plots/kirk_cps.png` successfully.
+
+---
+## Session: April 14, 2026
+
+### Prompt 49
+Read /users/jfkarhu/Numlab/hurricane_kirk/README.md to understand what the project is about and /users/jfkarhu/Numlab/hurricane_kirk/COMPLETION_SUMMARY_2026-04-13.md to understand where we left the last time of controlled end of session. Bear in mind that the last session was interrupted abruptly.
+
+### Response 49 (summary)
+- Read README.md (project overview, methods, status snapshot) and COMPLETION_SUMMARY_2026-04-13.md.
+- Confirmed last orderly session ended at prompt 41 (wrap-up Apr 13) with 41 prompts.
+- Abruptly interrupted session ran prompts 41–48 (numbering reset incorrectly); real continuation is from #49.
+- Corrected prompt log numbering and added Apr 14 session header.
+- Provided project status recap to user.
+
+### Prompt 50
+Go on with the recommended next steps!
+
+### Response 50 (summary)
+- Diagnosed interrupted session state: Cell 5 (wind-radius GRIB computation) was partially executed, colors in Cell 7 did not match unified scheme.
+- Confirmed `safe_name` fix (`.replace('+','p').replace('-','m')`) was already saved to notebook 04 Cell 3.
+- Confirmed `xr.concat(..., join='outer')` patch was already saved to notebook 04 Cell 5.
+- Executed full notebook 04 via `jupyter nbconvert --execute` — all 4 runs processed (baserun, +3K, +6K, -3K, 49 timesteps each).
+- Fixed color mapping in Cell 7 to unified scheme: -3K=#1f77b4(tab:blue), baserun=#2ca02c(tab:green), +3K=#ff7f0e(tab:orange), +6K=#d62728(tab:red).
+- Re-executed notebook to regenerate all plots with correct colors.
+- Generated/updated: `plots/kirk_windradius_EW.png`, `plots/kirk_windradius_NS.png`, `plots/kirk_R17.png` (all at 2026-04-14 19:03 UTC).
+
+### Prompt 51
+The plot /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_R17.png should be redrawn with max y-range 3000 km. the last timestep value of +3K run should be allowed to overshoot!
+
+### Response 51 (summary)
+- Modified Cell 9 in `notebooks/04_wind_radius.ipynb`: added `ax.set_ylim(0, 3000)` and `clip_on=(run_name != '+3K')` so the +3K final value renders above the y-axis limit.
+- Re-executed full notebook via `jupyter nbconvert --execute`.
+- `plots/kirk_R17.png` regenerated at 19:11 (file grew 83→118 KB reflecting overshoot content).
