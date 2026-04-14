@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 """Quickly diagnose GRIB coordinate structure without full data load."""
+import os
 import sys
-sys.path.insert(0, 'scripts')
+
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_ROOT = os.path.dirname(_HERE)
+sys.path.insert(0, os.path.join(_ROOT, 'scripts'))
 
 import warnings
 warnings.filterwarnings('ignore', category=FutureWarning)

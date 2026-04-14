@@ -16,7 +16,7 @@ git status
 
 If that works, proceed with commit:
 ```bash
-git add project_prompts.md project_prompts_and_responses.md COMPLETION_SUMMARY_*.md README.md run_cps_analysis.py notebooks/05_multi_run_comparison.ipynb
+git add project_prompts.md project_prompts_and_responses.md COMPLETION_SUMMARY_*.md README.md scripts/run_cps_analysis.py notebooks/05_multi_run_comparison.ipynb
 git commit -m "Session Apr 13: unified colors, robust IBTrACS, -3K experiments, CPS annotations"
 git push
 ```

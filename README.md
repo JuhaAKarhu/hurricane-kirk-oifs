@@ -72,7 +72,7 @@ Primary reused code is in `ribberink_code/hurricane_functions.py`:
 ### CPS analysis (core project axis)
 
 - Status: **method implemented, execution/validation pending in current workspace state**
-- Implemented in `notebooks/03_cps_analysis.ipynb` and `run_cps_analysis.py`
+- Implemented in `notebooks/03_cps_analysis.ipynb` and `scripts/run_cps_analysis.py`
 - Uses OIFS geopotential-height conversion in `scripts/oifs_adapter.py` and Ribberink `hart`
 - Current repository `plots/` does not yet contain `kirk_cps.png`, so final CPS figures should be regenerated and checked
 
@@ -86,10 +86,10 @@ Primary reused code is in `ribberink_code/hurricane_functions.py`:
 
 ### Session handoff (2026-04-10, end of day)
 
-- CPS preprocessing and plotting path is now working with gridded geopotential input (`scripts/convert_spectral_to_grid.sh`, `scripts/oifs_adapter.py`, `run_cps_analysis.py`).
+- CPS preprocessing and plotting path is now working with gridded geopotential input (`scripts/convert_spectral_to_grid.sh`, `scripts/oifs_adapter.py`, `scripts/run_cps_analysis.py`).
 - Ribberink Fig. 5-style ETT timing logic has been identified from `ribberink_code/new_hart_comp.ipynb`:
   - ETT start criterion used there is first time where lower-layer asymmetry exceeds threshold: `B > 10 m` (600-900 hPa layer).
-- A dedicated multi-run timing script has been created and validated: `run_ett_timing_analysis.py`.
+- A dedicated multi-run timing script has been created and validated: `scripts/run_ett_timing_analysis.py`.
   - It computes lower-layer B series per run and ET-start timestamps using the same threshold criterion.
   - It writes `plots/ett_start_timing.png`, `plots/tracks/ett_start_summary.csv`, and per-run `plots/tracks/ett_B_timeseries_<run>.csv` files.
   - Latest ET-start timestamps:
@@ -101,7 +101,7 @@ Primary reused code is in `ribberink_code/hurricane_functions.py`:
 Suggested restart sequence:
 1. `cd /users/jfkarhu/Numlab/hurricane_kirk`
 2. `source .venv/bin/activate`
-3. If needed, rerun `python run_ett_timing_analysis.py`
+3. If needed, rerun `python scripts/run_ett_timing_analysis.py`
 4. Continue with `notebooks/05_multi_run_comparison.ipynb`
 
 ## Session Workflow & Reproducibility
@@ -192,9 +192,14 @@ hurricane_kirk/
 ├── scripts/
 │   ├── oifs_adapter.py            # Read OIFS GRIB → xarray (Ribberink-compatible)
 │   ├── run_track.py               # Batch track computation for all runs
+│   ├── run_cps_analysis.py        # CPS multi-run plotting/diagnostics runner
+│   ├── run_ett_timing_analysis.py # ETT-start timing runner
 │   ├── core_radius_metrics.py     # Direction-aware and mean core-radius metrics
 │   ├── plot_tracks_comparison.py  # Plot all runs and optional best-track overlay
 │   └── download_ibtracs.py        # Download IBTrACS best track for Kirk 2024
+├── dev_tools/                     # Optional diagnostics and ad hoc sanity checks
+│   ├── diag_grib_coords.py
+│   └── test_hart_minimal.py
 ├── ribberink_code/                # Cloned from MRibberink/OpheliaPaperCode
 ├── plots/                         # Output figures (not committed)
 ├── data/                          # IBTrACS file (not committed, too large)
@@ -248,6 +253,8 @@ source .venv/bin/activate
 
 # Recompute tracks for all four SST experiments
 python scripts/run_track.py
+python scripts/run_ett_timing_analysis.py
+python scripts/run_cps_analysis.py
 
 # Plot only model tracks
 python scripts/plot_tracks_comparison.py --no-best-track --label-hour 12

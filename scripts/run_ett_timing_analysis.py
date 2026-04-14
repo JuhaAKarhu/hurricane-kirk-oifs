@@ -1,11 +1,3 @@
-#!/usr/bin/env python3
-"""Backward-compatible wrapper for scripts/run_ett_timing_analysis.py."""
-from pathlib import Path
-import runpy
-
-if __name__ == '__main__':
-    script_path = Path(__file__).resolve().parent / 'scripts' / 'run_ett_timing_analysis.py'
-    runpy.run_path(str(script_path), run_name='__main__')
 import os
 import sys
 import numpy as np
@@ -19,8 +11,9 @@ import matplotlib.dates as mdates
 
 # Resolve paths relative to this script's directory.
 _HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(_HERE, 'scripts'))
-sys.path.insert(0, os.path.join(_HERE, 'ribberink_code'))
+_ROOT = os.path.dirname(_HERE)
+sys.path.insert(0, _HERE)
+sys.path.insert(0, os.path.join(_ROOT, 'ribberink_code'))
 
 from oifs_adapter import RUNS, OIFSRun, gridded_z_dir
 import hurricane_functions as hf
@@ -33,7 +26,7 @@ def run_name_to_safe(run_name):
 
 def load_track_for_run(run_name):
     safe_name = run_name_to_safe(run_name)
-    path = os.path.join(_HERE, f'plots/tracks/track_{safe_name}.nc')
+    path = os.path.join(_ROOT, f'plots/tracks/track_{safe_name}.nc')
     if not os.path.exists(path):
         return None
     return xr.open_dataset(path)
@@ -131,7 +124,7 @@ def main():
 
     # Save ET-start summary table.
     summary_df = pd.DataFrame(summary_rows)
-    summary_csv = os.path.join(_HERE, 'plots/tracks/ett_start_summary.csv')
+    summary_csv = os.path.join(_ROOT, 'plots/tracks/ett_start_summary.csv')
     summary_df.to_csv(summary_csv, index=False)
     print(f'Saved: {summary_csv}')
 
@@ -143,7 +136,7 @@ def main():
             'B_raw': data['b_raw'],
             'B_smooth': data['b_smooth'],
         })
-        out_csv = os.path.join(_HERE, f'plots/tracks/ett_B_timeseries_{safe}.csv')
+        out_csv = os.path.join(_ROOT, f'plots/tracks/ett_B_timeseries_{safe}.csv')
         df.to_csv(out_csv, index=False)
 
     # Build Fig.-5-style two-panel timing figure.
@@ -203,7 +196,7 @@ def main():
     fig.suptitle('Hurricane Kirk 2024: ETT Start Timing Across Simulations', fontsize=13)
     fig.tight_layout()
 
-    fig_path = os.path.join(_HERE, 'plots/ett_start_timing.png')
+    fig_path = os.path.join(_ROOT, 'plots/ett_start_timing.png')
     fig.savefig(fig_path, dpi=160)
     print(f'Saved: {fig_path}')
 

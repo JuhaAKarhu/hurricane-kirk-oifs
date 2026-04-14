@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 """Minimal hart() test with fake data to diagnose coordinate issues."""
+import os
 import sys
-sys.path.insert(0, 'ribberink_code')
+
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_ROOT = os.path.dirname(_HERE)
+sys.path.insert(0, os.path.join(_ROOT, 'ribberink_code'))
 
 import numpy as np
 import xarray as xr

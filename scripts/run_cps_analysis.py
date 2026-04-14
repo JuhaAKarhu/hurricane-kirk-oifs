@@ -1,16 +1,9 @@
-#!/usr/bin/env python3
-"""Backward-compatible wrapper for scripts/run_cps_analysis.py."""
-from pathlib import Path
-import runpy
-
-if __name__ == '__main__':
-    script_path = Path(__file__).resolve().parent / 'scripts' / 'run_cps_analysis.py'
-    runpy.run_path(str(script_path), run_name='__main__')
 import sys, os
-# Resolve paths relative to this script's own directory
+# Resolve paths relative to repository root.
 _HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(_HERE, 'scripts'))
-sys.path.insert(0, os.path.join(_HERE, 'ribberink_code'))
+_ROOT = os.path.dirname(_HERE)
+sys.path.insert(0, _HERE)
+sys.path.insert(0, os.path.join(_ROOT, 'ribberink_code'))
 
 import numpy as np
 import xarray as xr
@@ -47,7 +40,7 @@ def run_name_to_safe(run_name):
 tracks = {}
 for run_name in RUNS:
     safe_name = run_name_to_safe(run_name)
-    path = os.path.join(_HERE, f'plots/tracks/track_{safe_name}.nc')
+    path = os.path.join(_ROOT, f'plots/tracks/track_{safe_name}.nc')
     if os.path.exists(path):
         tracks[run_name] = xr.open_dataset(path)
         print(f'Loaded track: {run_name} ({len(tracks[run_name].time)} timesteps)')
@@ -110,7 +103,7 @@ colors = {
     '+3K': 'tab:orange',
     '+6K': 'tab:red',
 }
-ett_start_times = load_ett_start_times(_HERE)
+ett_start_times = load_ett_start_times(_ROOT)
 
 fig, axes = plt.subplots(1, 2, figsize=(14, 6))
 
@@ -200,6 +193,6 @@ for ax_idx, (ax, vt_key, title) in enumerate([
 
 plt.suptitle('Hurricane Kirk 2024 – Cyclone Phase Space', fontsize=13)
 plt.tight_layout()
-plt.savefig(os.path.join(_HERE, 'plots/kirk_cps.png'), dpi=150)
+plt.savefig(os.path.join(_ROOT, 'plots/kirk_cps.png'), dpi=150)
 plt.show()
 print('Saved: plots/kirk_cps.png')

@@ -676,3 +676,43 @@ Please, do!
 - Proceeded with the requested verification commit action.
 - Re-checked notebook state and pending git changes before commit.
 - Included the updated notebooks, both prompt logs, and regenerated `plots/kirk_summary_stats.csv` in the commit.
+
+### Prompt 65
+Are all those scripts still needed?
+
+### Response 65 (summary)
+- Reviewed root-level Python files and their usage references.
+- Keep as operational entry points: `run_cps_analysis.py`, `run_ett_timing_analysis.py` (both are actively used in workflow/README).
+- Optional archival/cleanup candidates: `diag_grib_coords.py` (one-off GRIB coordinate diagnostic) and `test_hart_minimal.py` (ad hoc local sanity check, not integrated in test suite).
+- Recommendation: keep the two runner scripts; move or archive the two diagnostic/test scripts under `scripts/` (or a dedicated `dev_tools/`), and update docs accordingly if paths change.
+
+### Prompt 66
+Do you actually mean to suggest moving the "1. Keep" scripts to scripts and remove/archive the "2. Optional" scripts?
+
+### Response 66 (summary)
+- Clarified recommendation: do not move the two "Keep" scripts right now if the goal is minimal-risk cleanup.
+- Keep operational entry points (`run_cps_analysis.py`, `run_ett_timing_analysis.py`) at repository root to preserve current documented commands and workflow compatibility.
+- Only move/archive optional diagnostics (`diag_grib_coords.py`, `test_hart_minimal.py`) to a secondary location such as `scripts/` or `dev_tools/`.
+
+### Prompt 67
+Wouldn't it be cleaner to have all necessary scripts in scripts -directory (and perhaps the optional in dev_tools folder or optionally remove them totally)?!
+
+### Response 67 (summary)
+- Yes, structurally that is cleaner.
+- Recommended target layout: operational runners under `scripts/`, optional diagnostics under `dev_tools/` (or removed if not needed).
+- Migration caveat: runner scripts currently assume repository-root relative paths; moving them requires path-bootstrap updates and doc command updates to avoid breakage.
+- Best-practice compromise: move core runners to `scripts/` and keep small root-level wrapper entry points for backward compatibility.
+
+### Prompt 68
+Implement the full migration!
+
+### Response 68 (summary)
+- Implemented full migration:
+  - Moved core runners to `scripts/run_cps_analysis.py` and `scripts/run_ett_timing_analysis.py`.
+  - Moved optional utilities to `dev_tools/diag_grib_coords.py` and `dev_tools/test_hart_minimal.py`.
+- Added root-level compatibility wrappers:
+  - `run_cps_analysis.py` -> dispatches to `scripts/run_cps_analysis.py`
+  - `run_ett_timing_analysis.py` -> dispatches to `scripts/run_ett_timing_analysis.py`
+- Updated path bootstrapping in migrated scripts to resolve imports/data from repository root after relocation.
+- Updated documentation references and command examples in `README.md` and `GIT_HPC_WORKFLOW.md`.
+- Performed syntax validation (`python -m py_compile`) for migrated and wrapper scripts.

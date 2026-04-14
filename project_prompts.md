@@ -185,3 +185,11 @@ Make the polygon visible in the plot by colouring the polygon are with c. 85 % t
 63. "According to the listing above, the timestamps show pre-cleanup times. Please verify again, that the cleaned up code actually produced these files! Otherwise try to produce them!"
 
 64. "Please, do!"
+
+65. "Are all those scripts still needed?"
+
+66. "Do you actually mean to suggest moving the \"1. Keep\" scripts to scripts and remove/archive the \"2. Optional\" scripts?"
+
+67. "Wouldn't it be cleaner to have all necessary scripts in scripts -directory (and perhaps the optional in dev_tools folder or optionally remove them totally)?!"
+
+68. "Implement the full migration!"
