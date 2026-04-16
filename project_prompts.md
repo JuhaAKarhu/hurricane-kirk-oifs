@@ -209,3 +209,11 @@ Make the polygon visible in the plot by colouring the polygon are with c. 85 % t
 75. "Let's assume that the user of the repo is someone who has access to Mahti and the datafiles... The Readme files should instruct the user how to run the code, where to start and what (if any) is necessary to change (paths?, which?) and what kind of hickups possibly to expect."
 
 76. "What do you mean by optional? The init time is fixed with the data files. This repo is not intended to be used for other data, the instruction should focus on how to reproduce the files (verify them) with the same data."
+
+## 2026-04-15
+
+77. "For presentation purposes please suggest a wordin for a disclaimer that explains that these and these plots have been produced by codebase developed with the use of Copilot agent in VS code and that the code repository is accessible at thius and this github repository."
+
+## 2026-04-16
+
+78. "Read /users/jfkarhu/Numlab/hurricane_kirk/README.md to know what the project is about."

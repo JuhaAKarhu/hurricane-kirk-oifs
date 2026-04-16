@@ -805,3 +805,22 @@ What do you mean by optional? The init time is fixed with the data files. This r
 - Clarified README to fixed-data reproducibility mode for Mahti.
 - Replaced path-edit guidance with explicit instruction to keep `MAHTI_BASE`, `GRIDDED_Z_BASE`, and `INIT_DATETIME` unchanged.
 - Added path-access verification commands and reframed failures as environment/access issues rather than configuration customization.
+
+## 2026-04-15
+
+### Prompt 77
+For presentation purposes please suggest a wordin for a disclaimer that explains that these and these plots have been produced by codebase developed with the use of Copilot agent in VS code and that the code repository is accessible at thius and this github repository.
+
+### Response 77 (summary)
+- Provided ready-to-use disclaimer wording for presentation slides.
+- Included an explicit statement that the figures were generated using a codebase developed with GitHub Copilot agent support in VS Code.
+- Included placeholders for repository URL(s) so the audience can access the public code repository directly.
+
+## 2026-04-16
+
+### Prompt 78
+Read /users/jfkarhu/Numlab/hurricane_kirk/README.md to know what the project is about.
+
+### Response 78 (summary)
+- Read `README.md` and summarized the project focus, data context, run workflow, and current validated outputs.
+- Confirmed the repository is a fixed-data Mahti reproducibility workflow for Hurricane Kirk OIFS SST-perturbation experiments with Hart CPS as the core diagnostic.
