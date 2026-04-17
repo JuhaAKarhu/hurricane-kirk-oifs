@@ -183,7 +183,7 @@ def plot_geopotential_comparison():
         ('2024-10-08 06:00', 'Extratropical Stage'),
     ]
     
-    fig, axes = plt.subplots(1, 3, figsize=(18, 5))
+    fig, axes = plt.subplots(1, 3, figsize=(15, 4.5))
     fig.suptitle('900-600 hPa Geopotential Height Difference Anomalies', fontsize=14, fontweight='bold')
     
     _, _, track_ds = load_track_and_position(timestamps[0][0])
@@ -243,17 +243,18 @@ def plot_geopotential_comparison():
                               edgecolor='black', linewidth=2, linestyle='--', alpha=0.7, zorder=50)
         ax.add_patch(circle_outline)
         
-        # Storm translation direction - extend arrow to 500 km circle
+        # Storm translation direction - extend arrow to 500 km circle edge
         dlat_vel, dlon_vel = get_storm_velocity(track_ds, params['timestamp'])
-        # Calculate arrow length to reach 500 km circle (convert to degrees, ~111 km per degree)
-        arrow_length_deg = 500.0 / 111.0
+        # Calculate arrow length to reach just at the inner edge of 500 km circle
+        # Subtract arrow head length (0.25 deg) so tip lands at circle edge
+        arrow_length_deg = (500.0 / 111.0) - 0.25
         ax.arrow(lon_center, lat_center, dlon_vel * arrow_length_deg, dlat_vel * arrow_length_deg,
                 head_width=0.3, head_length=0.25, fc='white', ec='white', linewidth=2.5, zorder=100)
         
         # Perpendicular dashed line (left-right separation for B calculation)
-        # Perpendicular direction is (-dlon_vel, dlat_vel) rotated 90 degrees
-        perp_dlon = -dlat_vel
-        perp_dlat = dlon_vel
+        # Perpendicular to motion direction
+        perp_dlon = dlat_vel
+        perp_dlat = -dlon_vel
         perp_length_deg = 500.0 / 111.0
         ax.plot([lon_center - perp_dlon * perp_length_deg, lon_center + perp_dlon * perp_length_deg],
                [lat_center - perp_dlat * perp_length_deg, lat_center + perp_dlat * perp_length_deg],
@@ -286,7 +287,7 @@ def plot_geopotential_comparison():
         cf_list.append(cf)
     
     # Single colorbar
-    cbar_ax = fig.add_axes([0.90, 0.15, 0.02, 0.7])
+    cbar_ax = fig.add_axes([0.88, 0.18, 0.015, 0.6])
     cbar = plt.colorbar(cf_list[0], cax=cbar_ax, orientation='vertical')
     cbar.set_label('Anomaly (m)', fontsize=11, fontweight='bold')
     
@@ -302,13 +303,13 @@ def plot_geopotential_comparison():
                   label='Left-right separation (white dashed line)'),
         mpatches.Patch(facecolor='white', edgecolor='none', label='Area outside 500 km (white)'),
     ]
-    fig.legend(handles=legend_elements, loc='lower center', ncol=5, fontsize=10, 
-              bbox_to_anchor=(0.5, -0.08))
+    fig.legend(handles=legend_elements, loc='lower center', ncol=5, fontsize=9, 
+              bbox_to_anchor=(0.5, -0.12))
     
-    plt.tight_layout(rect=[0, 0.1, 0.88, 0.96])
+    plt.subplots_adjust(wspace=0.15, hspace=0.3, left=0.06, right=0.87, bottom=0.18, top=0.93)
     
     outfile = '/users/jfkarhu/Numlab/hurricane_kirk/plots/geopotential_anomalies_comparison.png'
-    plt.savefig(outfile, dpi=150, bbox_inches='tight')
+    plt.savefig(outfile, dpi=150)
     print(f"Saved: {outfile}")
     plt.close()
 
