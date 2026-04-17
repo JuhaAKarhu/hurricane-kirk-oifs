@@ -243,11 +243,21 @@ def plot_geopotential_comparison():
                               edgecolor='black', linewidth=2, linestyle='--', alpha=0.7, zorder=50)
         ax.add_patch(circle_outline)
         
-        # Storm translation direction
+        # Storm translation direction - extend arrow to 500 km circle
         dlat_vel, dlon_vel = get_storm_velocity(track_ds, params['timestamp'])
-        arrow_scale = 2.5
-        ax.arrow(lon_center, lat_center, dlon_vel * arrow_scale, dlat_vel * arrow_scale,
+        # Calculate arrow length to reach 500 km circle (convert to degrees, ~111 km per degree)
+        arrow_length_deg = 500.0 / 111.0
+        ax.arrow(lon_center, lat_center, dlon_vel * arrow_length_deg, dlat_vel * arrow_length_deg,
                 head_width=0.3, head_length=0.25, fc='white', ec='white', linewidth=2.5, zorder=100)
+        
+        # Perpendicular dashed line (left-right separation for B calculation)
+        # Perpendicular direction is (-dlon_vel, dlat_vel) rotated 90 degrees
+        perp_dlon = -dlat_vel
+        perp_dlat = dlon_vel
+        perp_length_deg = 500.0 / 111.0
+        ax.plot([lon_center - perp_dlon * perp_length_deg, lon_center + perp_dlon * perp_length_deg],
+               [lat_center - perp_dlat * perp_length_deg, lat_center + perp_dlat * perp_length_deg],
+               'w--', linewidth=2.5, alpha=0.8, zorder=99)
         
         # Storm center
         ax.plot(lon_center, lat_center, 'w+', markersize=14, markeredgewidth=3, zorder=101)
@@ -276,7 +286,7 @@ def plot_geopotential_comparison():
         cf_list.append(cf)
     
     # Single colorbar
-    cbar_ax = fig.add_axes([0.92, 0.15, 0.02, 0.7])
+    cbar_ax = fig.add_axes([0.90, 0.15, 0.02, 0.7])
     cbar = plt.colorbar(cf_list[0], cax=cbar_ax, orientation='vertical')
     cbar.set_label('Anomaly (m)', fontsize=11, fontweight='bold')
     
@@ -288,12 +298,14 @@ def plot_geopotential_comparison():
                   markeredgewidth=3, label='Storm center (white +)'),
         mpatches.Patch(facecolor='none', edgecolor='black', linewidth=2, linestyle='--', 
                       label='500 km radius (dashed circle)'),
+        plt.Line2D([0], [0], color='white', linewidth=2.5, linestyle='--', 
+                  label='Left-right separation (white dashed line)'),
         mpatches.Patch(facecolor='white', edgecolor='none', label='Area outside 500 km (white)'),
     ]
-    fig.legend(handles=legend_elements, loc='lower center', ncol=4, fontsize=10, 
+    fig.legend(handles=legend_elements, loc='lower center', ncol=5, fontsize=10, 
               bbox_to_anchor=(0.5, -0.08))
     
-    plt.tight_layout(rect=[0, 0.1, 0.9, 0.96])
+    plt.tight_layout(rect=[0, 0.1, 0.88, 0.96])
     
     outfile = '/users/jfkarhu/Numlab/hurricane_kirk/plots/geopotential_anomalies_comparison.png'
     plt.savefig(outfile, dpi=150, bbox_inches='tight')
