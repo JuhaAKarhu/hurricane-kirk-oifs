@@ -206,7 +206,7 @@ def plot_geopotential_comparison():
 
         # Compute B parameter from precomputed ETT analysis
         B = compute_thermal_asymmetry(timestamp=timestamp_str, run_name='baserun')
-        
+
         all_anom_data.append({
             'z_anom': z_anom,
             'lon_subset': lon_subset,
@@ -238,17 +238,13 @@ def plot_geopotential_comparison():
         # Create mesh for the subset domain
         lon_mesh, lat_mesh = np.meshgrid(lon_subset, lat_subset)
 
-        # Mask area outside 500 km circle to white (set to NaN before plotting)
+        # Mask area outside 600 km circle to white (set to NaN before plotting)
         z_anom_masked = z_anom.copy()
         z_anom_masked[distance_circle > 600] = np.nan
 
         # Plot anomaly field with contours using unified levels
         cf = ax.contourf(lon_mesh, lat_mesh, z_anom_masked, levels=levels, cmap='RdBu_r', extend='both')
         ax.contour(lon_mesh, lat_mesh, z_anom_masked, levels=levels[::2], colors='k', linewidths=0.5, alpha=0.3)
-
-        # Make area outside 600 km circle white explicitly
-        circle_mask = Circle((lon_center, lat_center), 600/111.0, fill=True, facecolor='white', edgecolor='none', zorder=40)
-        ax.add_patch(circle_mask)
 
         # Add circle showing 600 km analysis radius (dashed outline)
         circle_outline = Circle((lon_center, lat_center), 600/111.0, fill=False, edgecolor='black', linewidth=2, linestyle='--', alpha=0.7, zorder=50)
