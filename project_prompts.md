@@ -253,3 +253,5 @@ Make the polygon visible in the plot by colouring the polygon are with c. 85 % t
 94. "make the font in bottom legends bold to match the x and y-xis titles lift the legend box little bit upwards. Add \"In the Control Run\" to the end of the figure title.."
 
 95. "Please commit all changes and push!"
+
+96. "Check /users/jfkarhu/Numlab/hurricane_kirk/.project_setup.sh"

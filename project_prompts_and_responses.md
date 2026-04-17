@@ -1001,3 +1001,12 @@ Please commit all changes and push!
 - Initial commit/push attempt was blocked because `git` was not available in PATH in the active shell.
 - Checked project setup script and confirmed `.project_setup.sh` loads git via module (`module load git`).
 - After sourcing `.project_setup.sh`, git became available (`/appl/spack/.../git`, version 2.40.0), enabling commit/push operations.
+
+### Prompt 96
+Check /users/jfkarhu/Numlab/hurricane_kirk/.project_setup.sh
+
+### Response 96 (summary)
+- Verified `.project_setup.sh` contains:
+  - shebang `#!/bin/bash`
+  - module command `module load git 2>/dev/null`
+- Confirmed sourcing this file makes git available in the environment and resolves the earlier commit/push blocker.
