@@ -862,3 +862,15 @@ Stage and commit!
 - Updated both reproducibility log files with session Apr 17 prompts (80–83) and response summaries.
 - Staged modified plot script, untracked full-period ETT figure, and updated prompt logs.
 - Committed all changes with message: "Session Apr 17: ETT full-period plot, legend reposition, session status recovery."
+
+### Prompt 84
+In order to explain the asymmetry parameter to the audience, I want to plot three examples of Ribberink et al Fig 6 type of subplots of geopotential height difference anomaly: one for hurricane stage and one for ETT start and one for extratropical stage. In the subplots a white line denoting the storm translation direction should be displayed. The examples should be from control run at 5 Oct 06 UTC (hurricane), 6 Oct 06UTC (ETT start), and 8 Oct 06 (ET stage). Annotate the subplots accordingly!
+
+### Response 84 (summary)
+- Created new script `scripts/plot_geopotential_anomalies.py` to generate three-panel geopotential height anomaly visualization.
+- Implemented geopotential anomaly computation at 500 hPa in 600 km radius around storm center for each specified timestamp and phase.
+- Added white arrow overlays showing storm translation direction vectors (computed from track velocity between neighboring timesteps).
+- Included storm center marker (+) and analysis-radius circle for visual context.
+- Added colorbars and phase-specific annotations for hurricane/ETT-start/extratropical stages.
+- Generated output: `plots/geopotential_anomalies_comparison.png` (110 KB).
+- Figure successfully shows spatial geopotential patterns during different phases of Hurricane Kirk's evolution in the control run.
