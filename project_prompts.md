@@ -235,3 +235,21 @@ Make the polygon visible in the plot by colouring the polygon are with c. 85 % t
 85. "You did not fully understand the goal. For example, the subplots do not have a y- and x-axis. The area plus/minus 5 deg around the storm center should fit the subplot without leaving empty spaces to north-south and east-west direction. As the plot area is a circle there are empty spaces in the corners of square shaped subplot area. Please, try again!"
 
 86. "Unify the clouring and range over all subplots and plot only one colour bars. Calculate the thermal asymmetry parameter for that timestamp (or get it from earlier stages) and place it top right corner of the subplots. Fit the 5 degree or 500 km circle in the subplot square and make the square area outside of the circle white."
+
+87. "I realize the geopotential anomaly visualization might not match the Ribberink et al. methodology exactly. Can you verify that we're computing 900-600 hPa **difference** anomalies (not 500 hPa single level), using a **full-run baseline** (not instantaneous domain mean), and using the correct **500 km analysis radius**? Please check the Ribberink hart() function to confirm implementation details."
+
+88. "Xtend the storm direction arrow all the way to the 500 km circle. Add a white dashed line with equal width that extends from the storm center to the opposite site of the circle until the circle to represent the line that separetes the left and right halfs used for asymmetry parameter calculation. Make the plot more tight so that the subplots are more close to each other."
+
+89. "Now the arrow extends over the circle. make the tip of the arrow land just at the iner edge of the circle. The dashed line is now 90 degrees off. make the subplots more close to each other, there is too much empty space between them now and the plot looks glumsy, too loose."
+
+90. "Increase the figure area to top direction slightly and increas the figure title font 25%.  The directional indicators (storm motion arrow and separation line) are not properly aligned, now. The dashed line shoul not be perpendicular to the arrow, they should align so that the dashed line has the same alignment (direction) as the arrow!"
+
+91. "In earlier versions of the figure there was a selection of explanatory items (legends) eg. for the arrow, circle, etc. beow the subplots. Please return those elements to the figure!"
+
+92. "Remove the legend: \"Area outside 500 km circle\" and increase the font to be the same as y andd x-axis titles."
+
+93. "I believe that in the original Ribberink subplots the lat lon coordinates were ignored and the that way the circle and the unmasked area coinsided completely, if I understand correclty. If I am correct, (please, consider), we could do similarily!"
+
+94. "make the font in bottom legends bold to match the x and y-xis titles lift the legend box little bit upwards. Add \"In the Control Run\" to the end of the figure title.."
+
+95. "Please commit all changes and push!"

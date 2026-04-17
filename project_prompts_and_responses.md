@@ -899,3 +899,105 @@ Unify the clouring and range over all subplots and plot only one colour bars. Ca
 - Added explicit white background within ±5° square domain for areas beyond the 600 km radius.
 - Enhanced legend to include "Area outside 600 km (white)" explanation.
 - Final output: `plots/geopotential_anomalies_comparison.png` (152 KB) with unified coloring, single colorbar, B parameters displayed, and white-masked areas outside the 600 km analysis circle.
+
+### Prompt 87
+I realize the geopotential anomaly visualization might not match the Ribberink et al. methodology exactly. Can you verify that we're computing 900-600 hPa **difference** anomalies (not 500 hPa single level), using a **full-run baseline** (not instantaneous domain mean), and using the correct **500 km analysis radius**? Please check the Ribberink hart() function to confirm implementation details.
+
+### Response 87 (summary)
+- Checked Ribberink `hurricane_functions.py` hart() implementation (lines 65–180) confirming:
+  - Uses two input levels (600 and 900 hPa) to compute vertical differences.
+  - Analysis radius is exactly 500 km (line 113: `distances<=500`).
+  - Hart CPS represents lower-layer (600–900 hPa) thermal asymmetry.
+- Verified current script vs. correct methodology:
+  - ❌ **Current**: Uses single 500 hPa level (WRONG).
+  - ❌ **Current**: Uses instantaneous domain mean as baseline (WRONG).
+  - ❌ **Current**: Uses 600 km radius (WRONG).
+  - ✅ **Correct per Ribberink**: Should use 900-600 hPa difference.
+  - ✅ **Correct per Ribberink**: Should subtract full-run baseline mean of 900-600 difference over ±5° domain.
+  - ✅ **Correct per Ribberink**: Should use 500 km radius.
+- Rewritten `scripts/plot_geopotential_anomalies.py`:
+  - New `compute_geopotential_difference_anomaly()` function loads both 900 and 600 hPa levels.
+  - Computes full-run baseline: mean of (900-600 hPa difference) over ±5° lat band, averaged across all timesteps.
+  - Computes anomaly: (instantaneous 900-600 diff) - (full-run baseline).
+  - Uses 500 km radius for analysis circle and masking.
+  - Maintained all prior improvements: unified coloring, single colorbar, B parameter annotations, storm direction arrow, NaN-based white masking.
+- Generated corrected output: `plots/geopotential_anomalies_comparison.png` with 900-600 hPa difference anomalies aligned to Ribberink Hart CPS methodology.
+- Committed changes with message describing full methodological correction from single-level to difference-based analysis with proper full-run baseline subtraction.
+
+### Prompt 88
+Extend the storm direction arrow all the way to the 500 km circle. Add a white dashed line with equal width that extends from the storm center to the opposite site of the circle until the circle to represent the line that separetes the left and right halfs used for asymmetry parameter calculation. Make the plot more tight so that the subplots are more close to each other.
+
+### Response 88 (summary)
+- Extended storm translation arrow from storm center to reach the 500 km analysis circle boundary (calculated as 500 km ÷ 111 km/degree in lat/lon space).
+- Added perpendicular white dashed line passing through storm center that extends to both sides of the 500 km circle, representing the left-right separation used in asymmetry parameter B calculation.
+- Tightened plot layout: adjusted `tight_layout` rect from `[0, 0.1, 0.9, 0.96]` to `[0, 0.1, 0.88, 0.96]` and moved colorbar from x=0.92 to x=0.90 for closer subplot spacing.
+- Updated legend to 5 columns explaining both directional lines (motion arrow and left-right separation).
+- Regenerated `plots/geopotential_anomalies_comparison.png` with improved visualization clarity and tighter layout for publication quality.
+
+### Prompt 89
+Now the arrow extends over the circle. make the tip of the arrow land just at the iner edge of the circle. The dashed line is now 90 degrees off. make the subplots more close to each other, there is too much empty space between them now and the plot looks glumsy, too loose.
+
+### Response 89 (summary)
+- Fixed arrow to land precisely at the inner edge of 500 km circle by reducing arrow length by head_length (0.25 degrees).
+- Corrected perpendicular dashed line direction by flipping calculation: now uses (dlat_vel, -dlon_vel) instead of (-dlat_vel, dlon_vel) to properly represent left-right separation.
+- Reduced figure size from 18×5 to 15×4.5 inches for more compact visualization.
+- Replaced `tight_layout` with explicit `subplots_adjust(wspace=0.15, hspace=0.3, left=0.06, right=0.87, bottom=0.18, top=0.93)` for precise control of subplot spacing.
+- Narrowed colorbar width from 0.02 to 0.015 and adjusted position for tighter integration with plots.
+- Reduced legend font size from 10pt to 9pt and adjusted bbox_to_anchor to (-0.12 for better proportion with compact layout.
+- Removed `bbox_inches='tight'` from savefig to preserve manual layout specifications.
+- Regenerated `plots/geopotential_anomalies_comparison.png` with publication-ready spatial efficiency and corrected directional visualizations.
+
+### Prompt 90
+Increase the figure area to top direction slightly and increas the figure title font 25%.  The directional indicators (storm motion arrow and separation line) are not properly aligned, now. The dashed line shoul not be perpendicular to the arrow, they should align so that the dashed line has the same alignment (direction) as the arrow!
+
+### Response 90 (summary)
+- Increased figure top area slightly by adjusting layout to `top=0.86` and increased overall figure height from 5.5 to 5.7 inches.
+- Increased main figure title font size by 25% from 14 to 17.5.
+- Reoriented dashed separation line to align with storm-motion arrow (same direction axis through storm center), replacing the previous perpendicular construction.
+- Kept arrow endpoint behavior so the tip lands near the inner edge of the 500 km circle.
+- Regenerated `plots/geopotential_anomalies_comparison.png` successfully after these refinements.
+
+### Prompt 91
+In earlier versions of the figure there was a selection of explanatory items (legends) eg. for the arrow, circle, etc. beow the subplots. Please return those elements to the figure!
+
+### Response 91 (summary)
+- Restored and ensured visibility of explanatory legend items beneath the subplots by moving the legend anchor inside the figure canvas.
+- Kept legend entries for storm-motion arrow, storm center marker, 500 km circle, dashed separation line, and white masked area.
+- Set legend placement to lower center with `ncol=3`, `bbox_to_anchor=(0.5, 0.02)`, and enabled legend frame for readability.
+- Increased bottom subplot margin to `bottom=0.30` so legend has dedicated space and is not clipped.
+- Regenerated `plots/geopotential_anomalies_comparison.png` and verified successful output.
+
+### Prompt 92
+Remove the legend: "Area outside 500 km circle" and increase the font to be the same as y andd x-axis titles.
+
+### Response 92 (summary)
+- Removed the legend item describing the masked area outside the 500 km circle from the legend list.
+- Increased legend font size to 11 so it matches axis-title font size (`Longitude`/`Latitude`).
+- Adjusted legend layout to `ncol=2` for clean readability with fewer legend items.
+- Regenerated `plots/geopotential_anomalies_comparison.png` and verified successful output.
+
+### Prompt 93
+I believe that in the original Ribberink subplots the lat lon coordinates were ignored and the that way the circle and the unmasked area coinsided completely, if I understand correclty. If I am correct, (please, consider), we could do similarily!
+
+### Response 93 (summary)
+- Agreed and implemented a Ribberink-style plotting geometry for mask rendering: lat/lon metric differences are ignored in the mask-distance computation so the unmasked boundary coincides with the drawn 500 km circle in degree space.
+- Replaced great-circle distance calculation in `compute_geopotential_difference_anomaly()` with degree-space radial distance converted by a constant factor (`111 km/deg`): `distance_grid = 111 * sqrt(dlat_deg^2 + dlon_deg^2)`.
+- Kept the 500 km threshold unchanged (`z_anom[distance_grid > 500] = np.nan`) so the displayed unmasked region now matches the circle overlay shape consistently across subplots.
+- Regenerated `plots/geopotential_anomalies_comparison.png` and verified successful execution.
+
+### Prompt 94
+make the font in bottom legends bold to match the x and y-xis titles lift the legend box little bit upwards. Add "In the Control Run" to the end of the figure title..
+
+### Response 94 (summary)
+- Updated figure title to: `900-600 hPa Geopotential Height Difference Anomalies In the Control Run`.
+- Changed bottom legend text styling to bold with font size 11, matching axis-title sizing.
+- Moved legend slightly upward by changing anchor from `bbox_to_anchor=(0.5, 0.02)` to `(0.5, 0.05)`.
+- Regenerated `plots/geopotential_anomalies_comparison.png` successfully.
+
+### Prompt 95
+Please commit all changes and push!
+
+### Response 95 (summary)
+- Initial commit/push attempt was blocked because `git` was not available in PATH in the active shell.
+- Checked project setup script and confirmed `.project_setup.sh` loads git via module (`module load git`).
+- After sourcing `.project_setup.sh`, git became available (`/appl/spack/.../git`, version 2.40.0), enabling commit/push operations.
