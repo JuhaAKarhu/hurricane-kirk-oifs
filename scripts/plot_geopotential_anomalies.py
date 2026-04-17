@@ -14,6 +14,7 @@ Includes white lines showing storm translation direction.
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+from matplotlib.patches import Circle
 import xarray as xr
 from datetime import datetime, timedelta
 import sys
@@ -31,19 +32,19 @@ def get_storm_velocity(track_ds, timestamp):
     # Find closest two timesteps around the given timestamp
     times = track_ds['time'].values
     idx = np.argmin(np.abs(times - np.datetime64(timestamp)))
-    
+
     if idx == 0:
         idx = 1
     if idx >= len(times) - 1:
         idx = len(times) - 2
-    
+
     t1 = times[idx - 1]
     t2 = times[idx + 1]
     lat1 = float(track_ds['lat'].isel(time=idx-1).values)
     lon1 = float(track_ds['lon'].isel(time=idx-1).values)
     lat2 = float(track_ds['lat'].isel(time=idx+1).values)
     lon2 = float(track_ds['lon'].isel(time=idx+1).values)
-    
+
     # Velocity components (normalized)
     dlat = lat2 - lat1
     dlon = lon2 - lon1
@@ -51,7 +52,7 @@ def get_storm_velocity(track_ds, timestamp):
     if norm > 0:
         dlat /= norm
         dlon /= norm
-    
+
     return dlat, dlon, lat1, lon1, lat2, lon2
 
 
@@ -59,174 +60,250 @@ def load_track_and_position(timestamp):
     """Load track and get storm center position at given timestamp."""
     track_file = '/users/jfkarhu/Numlab/hurricane_kirk/plots/tracks/track_baserun.nc'
     track_ds = xr.open_dataset(track_file)
-    
+
     # Find closest timestep
     times = track_ds['time'].values
     idx = np.argmin(np.abs(times - np.datetime64(timestamp)))
-    
+
     lat = float(track_ds['lat'].isel(time=idx).values)
     lon = float(track_ds['lon'].isel(time=idx).values)
-    
+
     return lat, lon, track_ds
 
 
 def compute_geopotential_anomaly(oifs_run, timestamp, lat_center, lon_center, level_hpa=500, domain_half_width=5.0, gridded_z_dir=None):
     """
     Compute geopotential height difference/anomaly in a storm-relative square domain.
-    
+
     Parameters
     ----------
     domain_half_width : float
         Half-width of the square domain in degrees (default 5.0 gives ±5°).
     gridded_z_dir : str
         Directory with pre-converted gridded geopotential files.
-    
+
     Returns
     -------
-    tuple: (z_anom, lon_subset, lat_subset, distance_full, lat_full, lon_full, domain_bounds)
+    tuple: (z_anom, lon_subset, lat_subset, distance_circle, lat_full, lon_full, domain_bounds, lat_full_idx, lon_full_idx)
     """
     # Load geopotential at specified level
     z_data = oifs_run.get_geopotential_height(levels=(level_hpa,), gridded_z_dir=gridded_z_dir)
-    
+
     # Select timestep closest to given timestamp
     z_ts = z_data.sel(time=timestamp, method='nearest')['zg']
-    
+
     # Extract full lat/lon coordinates
     lat_full = z_ts['lat'].values
     lon_full = z_ts['lon'].values
-    
+
     # Get the actual geopotential values at the selected level
     if 'level' in z_ts.dims:
         z_vals_full = z_ts.sel(level=level_hpa, method='nearest').values
     else:
         z_vals_full = z_ts.values
-    
+
     # Create full mesh for distance calculation
     lon_grid_full, lat_grid_full = np.meshgrid(lon_full, lat_full)
-    
+
     # Calculate great-circle distance from storm center
     lat_center_rad = np.radians(lat_center)
     lon_center_rad = np.radians(lon_center)
     lat_grid_rad = np.radians(lat_grid_full)
     lon_grid_rad = np.radians(lon_grid_full)
-    
+
     dlat = lat_grid_rad - lat_center_rad
     dlon = lon_grid_rad - lon_center_rad
     a = np.sin(dlat/2)**2 + np.cos(lat_center_rad) * np.cos(lat_grid_rad) * np.sin(dlon/2)**2
     c = 2 * np.arcsin(np.sqrt(a))
     EARTH_RADIUS_KM = 6371
     distance_full = EARTH_RADIUS_KM * c
-    
+
     # Extract data within the square domain (±domain_half_width degrees)
     lat_min = lat_center - domain_half_width
     lat_max = lat_center + domain_half_width
     lon_min = lon_center - domain_half_width
     lon_max = lon_center + domain_half_width
-    
+
     # Subset to domain
     lat_idx = (lat_full >= lat_min) & (lat_full <= lat_max)
     lon_idx = (lon_full >= lon_min) & (lon_full <= lon_max)
-    
+
     lat_subset = lat_full[lat_idx]
     lon_subset = lon_full[lon_idx]
-    
-    # Subset the geopotential data
+
+    # Subset the geopotential data and distance
     z_subset = z_vals_full[np.ix_(lat_idx, lon_idx)]
-    
+    distance_circle = distance_full[np.ix_(lat_idx, lon_idx)]
+
     # Compute anomaly: difference from domain mean
     z_mean = np.nanmean(z_subset)
     z_anom = z_subset - z_mean
-    
+
     domain_bounds = (lat_min, lat_max, lon_min, lon_max)
-    
-    return z_anom, lon_subset, lat_subset, distance_full, lat_full, lon_full, domain_bounds
+
+    return z_anom, lon_subset, lat_subset, distance_circle, lat_full, lon_full, domain_bounds, lat_idx, lon_idx
+
+
+def compute_thermal_asymmetry(timestamp, run_name='baserun'):
+    """
+    Get thermal asymmetry parameter B (lower layer, 600-900 hPa) from precomputed ETT analysis.
+    Loads B values from existing ett_B_timeseries CSV files.
+    """
+    import pandas as pd
+    from datetime import datetime
+
+    try:
+        # Map run names to safe filenames
+        safe_name = run_name.replace('+', 'p').replace('-', 'm')
+        csv_file = f'/users/jfkarhu/Numlab/hurricane_kirk/plots/tracks/ett_B_timeseries_{safe_name}.csv'
+
+        # Read the B timeseries
+        df = pd.read_csv(csv_file)
+        df['time'] = pd.to_datetime(df['time'])
+
+        # Parse the target timestamp
+        target_time = pd.to_datetime(timestamp)
+
+        # Find the closest timestamp
+        idx = (df['time'] - target_time).abs().idxmin()
+        B_value = df.loc[idx, 'B_smooth']  # Use smoothed B values
+
+        return B_value
+    except Exception as e:
+        print(f"Warning: Could not load B from {csv_file}: {e}")
+        return None
 
 
 def plot_geopotential_comparison():
-    """Create three-panel geopotential anomaly figure."""
-    
+    """Create three-panel geopotential anomaly figure with unified coloring and B parameters."""
+
     # Initialize OIFS run handler for baserun
     run_dir = '/scratch/project_2001271/vasiakan/oifs_expt/kirk/T639L91/2024100306/int_exp_1003'
     gridded_z_dir = '/scratch/project_2001271/jfkarhu/cps_z_gridded/baserun'
     oifs_run = OIFSRun(run_dir=run_dir)
-    
+
     # Timestamps and labels for the three panels
     timestamps = [
         ('2024-10-05 06:00', 'Hurricane Stage'),
         ('2024-10-06 06:00', 'ETT Start'),
         ('2024-10-08 06:00', 'Extratropical Stage'),
     ]
-    
-    fig, axes = plt.subplots(1, 3, figsize=(16, 5))
-    fig.suptitle('Geopotential Height Anomalies at 500 hPa (±5° domain)', fontsize=14, fontweight='bold')
-    
+
+    fig, axes = plt.subplots(1, 3, figsize=(18, 5))
+    fig.suptitle('Geopotential Height Anomalies at 500 hPa', fontsize=14, fontweight='bold')
+
     # Load track for entire run (for velocity calculation)
     _, _, track_ds = load_track_and_position(timestamps[0][0])
-    
-    for idx, (timestamp_str, label) in enumerate(timestamps):
-        ax = axes[idx]
-        
-        # Get storm position
+
+    # Pre-compute all anomalies to get unified color range
+    all_anom_data = []
+    all_params = []
+    for timestamp_str, label in timestamps:
         lat_center, lon_center, _ = load_track_and_position(timestamp_str)
-        
-        # Compute anomaly (using ±5° square domain)
-        z_anom, lon_subset, lat_subset, distance_full, lat_full, lon_full, domain_bounds = compute_geopotential_anomaly(
+        z_anom, lon_subset, lat_subset, distance_circle, lat_full, lon_full, domain_bounds, lat_idx, lon_idx = compute_geopotential_anomaly(
             oifs_run, timestamp_str, lat_center, lon_center, level_hpa=500, domain_half_width=5.0, gridded_z_dir=gridded_z_dir
         )
+
+        # Compute B parameter from precomputed ETT analysis
+        B = compute_thermal_asymmetry(timestamp=timestamp_str, run_name='baserun')
         
+        all_anom_data.append({
+            'z_anom': z_anom,
+            'lon_subset': lon_subset,
+            'lat_subset': lat_subset,
+            'distance_circle': distance_circle,
+            'lat_center': lat_center,
+            'lon_center': lon_center,
+            'domain_bounds': domain_bounds,
+        })
+        all_params.append({'B': B, 'label': label, 'timestamp': timestamp_str})
+
+    # Compute unified color range (90th percentile of absolute values across all panels)
+    all_anom_values = np.concatenate([np.abs(d['z_anom']).flatten() for d in all_anom_data])
+    vmax_unified = np.nanpercentile(all_anom_values, 90)
+    levels = np.linspace(-vmax_unified, vmax_unified, 21)
+
+    # Plot each panel
+    cf_list = []
+    for idx, (data, params) in enumerate(zip(all_anom_data, all_params)):
+        ax = axes[idx]
+        z_anom = data['z_anom']
+        lon_subset = data['lon_subset']
+        lat_subset = data['lat_subset']
+        distance_circle = data['distance_circle']
+        lat_center = data['lat_center']
+        lon_center = data['lon_center']
+        domain_bounds = data['domain_bounds']
+
         # Create mesh for the subset domain
         lon_mesh, lat_mesh = np.meshgrid(lon_subset, lat_subset)
-        
-        # Plot anomaly field with contours
-        vmax = np.nanpercentile(np.abs(z_anom), 90)
-        levels = np.linspace(-vmax, vmax, 21)
-        cf = ax.contourf(lon_mesh, lat_mesh, z_anom, levels=levels, cmap='RdBu_r', extend='both')
-        ax.contour(lon_mesh, lat_mesh, z_anom, levels=levels[::2], colors='k', linewidths=0.5, alpha=0.3)
-        
-        # Add circle showing 600 km analysis radius
-        from matplotlib.patches import Circle
-        # Convert 600 km to approximate degrees (~5.4°)
-        radius_deg = 600 / 111.0
-        circle = Circle((lon_center, lat_center), radius_deg, fill=False, edgecolor='white', linewidth=2, linestyle='--', alpha=0.7, zorder=50)
-        ax.add_patch(circle)
-        
+
+        # Mask area outside 500 km circle to white (set to NaN before plotting)
+        z_anom_masked = z_anom.copy()
+        z_anom_masked[distance_circle > 600] = np.nan
+
+        # Plot anomaly field with contours using unified levels
+        cf = ax.contourf(lon_mesh, lat_mesh, z_anom_masked, levels=levels, cmap='RdBu_r', extend='both')
+        ax.contour(lon_mesh, lat_mesh, z_anom_masked, levels=levels[::2], colors='k', linewidths=0.5, alpha=0.3)
+
+        # Make area outside 600 km circle white explicitly
+        circle_mask = Circle((lon_center, lat_center), 600/111.0, fill=True, facecolor='white', edgecolor='none', zorder=40)
+        ax.add_patch(circle_mask)
+
+        # Add circle showing 600 km analysis radius (dashed outline)
+        circle_outline = Circle((lon_center, lat_center), 600/111.0, fill=False, edgecolor='black', linewidth=2, linestyle='--', alpha=0.7, zorder=50)
+        ax.add_patch(circle_outline)
+
         # Get and plot storm translation direction
-        dlat_vel, dlon_vel, lat_prev, lon_prev, lat_next, lon_next = get_storm_velocity(track_ds, timestamp_str)
+        dlat_vel, dlon_vel, lat_prev, lon_prev, lat_next, lon_next = get_storm_velocity(track_ds, params['timestamp'])
         arrow_scale = 2.5  # Scale for visibility
         ax.arrow(lon_center, lat_center, dlon_vel * arrow_scale, dlat_vel * arrow_scale,
                 head_width=0.3, head_length=0.25, fc='white', ec='white', linewidth=2.5, zorder=100)
-        
+
         # Mark storm center
         ax.plot(lon_center, lat_center, 'w+', markersize=14, markeredgewidth=3, zorder=101)
-        
+
         # Set square domain extent (±5°)
         ax.set_xlim(lon_center - 5.0, lon_center + 5.0)
         ax.set_ylim(lat_center - 5.0, lat_center + 5.0)
         ax.set_aspect('equal')
-        
+
         # Labels and formatting with proper axes
         ax.set_xlabel('Longitude (°E)', fontsize=11, fontweight='bold')
         ax.set_ylabel('Latitude (°N)', fontsize=11, fontweight='bold')
-        ax.set_title(f'{label}\n{timestamp_str[:10]} {timestamp_str[11:16]} UTC', fontsize=12, fontweight='bold')
+        ax.set_title(f'{params["label"]}\n{params["timestamp"][:10]} {params["timestamp"][11:16]} UTC', fontsize=12, fontweight='bold')
         ax.grid(True, alpha=0.3, linestyle=':', linewidth=0.5)
-        
+
         # Add tick labels
         ax.tick_params(labelsize=10)
-        
-        # Colorbar
-        cbar = plt.colorbar(cf, ax=ax, orientation='horizontal', pad=0.12, shrink=0.9)
-        cbar.set_label('Height anomaly (m)', fontsize=10)
-    
+
+        # Add B parameter in top-right corner
+        if params['B'] is not None:
+            b_text = f'B = {params["B"]:.1f} m'
+        else:
+            b_text = 'B = N/A'
+        ax.text(0.98, 0.98, b_text, transform=ax.transAxes, fontsize=11, fontweight='bold',
+                verticalalignment='top', horizontalalignment='right',
+                bbox=dict(boxstyle='round', facecolor='white', alpha=0.8, edgecolor='black'))
+
+        cf_list.append(cf)
+
+    # Add single colorbar for all subplots
+    cbar_ax = fig.add_axes([0.92, 0.15, 0.02, 0.7])
+    cbar = plt.colorbar(cf_list[0], cax=cbar_ax, orientation='vertical')
+    cbar.set_label('Height anomaly (m)', fontsize=11, fontweight='bold')
+
     # Add legend for symbol meanings
     legend_elements = [
         mpatches.Patch(facecolor='none', edgecolor='white', linewidth=2.5, label='Storm motion direction (white arrow)'),
         plt.Line2D([0], [0], marker='+', color='w', linestyle='', markersize=12, markeredgewidth=3, label='Storm center (white +)'),
-        mpatches.Patch(facecolor='none', edgecolor='white', linewidth=2, linestyle='--', label='600 km analysis radius (dashed circle)'),
+        mpatches.Patch(facecolor='none', edgecolor='black', linewidth=2, linestyle='--', label='600 km analysis radius (dashed circle)'),
+        mpatches.Patch(facecolor='white', edgecolor='none', label='Area outside 600 km (white)'),
     ]
-    fig.legend(handles=legend_elements, loc='lower center', ncol=3, fontsize=10, bbox_to_anchor=(0.5, -0.1))
-    
-    plt.tight_layout(rect=[0, 0.1, 1, 0.96])
-    
+    fig.legend(handles=legend_elements, loc='lower center', ncol=4, fontsize=10, bbox_to_anchor=(0.5, -0.08))
+
+    plt.tight_layout(rect=[0, 0.1, 0.9, 0.96])
+
     outfile = '/users/jfkarhu/Numlab/hurricane_kirk/plots/geopotential_anomalies_comparison.png'
     plt.savefig(outfile, dpi=150, bbox_inches='tight')
     print(f"Saved: {outfile}")

@@ -886,3 +886,16 @@ You did not fully understand the goal. For example, the subplots do not have a y
 - Enhanced white line styling for 600 km circle overlay (increased visibility).
 - Regenerated output: `plots/geopotential_anomalies_comparison.png` (316 KB, much richer visualization).
 - Figure now displays full ±5° square domain with proper axes and no unused corner space.
+
+### Prompt 86
+Unify the clouring and range over all subplots and plot only one colour bars. Calculate the thermal asymmetry parameter for that timestamp (or get it from earlier stages) and place it top right corner of the subplots. Fit the 5 degree or 500 km circle in the subplot square and make the square area outside of the circle white.
+
+### Response 86 (summary)
+- Implemented unified color range across all three subplots: compute vmax from 90th percentile of all panels combined.
+- Created single shared colorbar positioned on the right side of the figure (not individual colorbars per subplot).
+- Integrated thermal asymmetry parameter B loading from precomputed `ett_B_timeseries_baserun.csv` ETT analysis files.
+- Added B parameter display in top-right corner of each subplot with semi-transparent white background for readability.
+- Masked geopotential anomaly values outside 600 km circle to NaN before plotting (creates white area outside circle).
+- Added explicit white background within ±5° square domain for areas beyond the 600 km radius.
+- Enhanced legend to include "Area outside 600 km (white)" explanation.
+- Final output: `plots/geopotential_anomalies_comparison.png` (152 KB) with unified coloring, single colorbar, B parameters displayed, and white-masked areas outside the 600 km analysis circle.
