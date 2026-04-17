@@ -231,3 +231,5 @@ Make the polygon visible in the plot by colouring the polygon are with c. 85 % t
 83. "Stage and commit!"
 
 84. "In order to explain the asymmetry parameter to the audience, I want to plot three examples of Ribberink et al Fig 6 type of subplots of geopotential height difference anomaly: one for hurricane stage and one for ETT start and one for extratropical stage. In the subplots a white line denoting the storm translation direction should be displayed. The examples should be from control run at 5 Oct 06 UTC (hurricane), 6 Oct 06UTC (ETT start), and 8 Oct 06 (ET stage). Annotate the subplots accordingly!"
+
+85. "You did not fully understand the goal. For example, the subplots do not have a y- and x-axis. The area plus/minus 5 deg around the storm center should fit the subplot without leaving empty spaces to north-south and east-west direction. As the plot area is a circle there are empty spaces in the corners of square shaped subplot area. Please, try again!"

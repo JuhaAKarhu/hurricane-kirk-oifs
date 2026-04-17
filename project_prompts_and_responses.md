@@ -874,3 +874,15 @@ In order to explain the asymmetry parameter to the audience, I want to plot thre
 - Added colorbars and phase-specific annotations for hurricane/ETT-start/extratropical stages.
 - Generated output: `plots/geopotential_anomalies_comparison.png` (110 KB).
 - Figure successfully shows spatial geopotential patterns during different phases of Hurricane Kirk's evolution in the control run.
+
+### Prompt 85
+You did not fully understand the goal. For example, the subplots do not have a y- and x-axis. The area plus/minus 5 deg around the storm center should fit the subplot without leaving empty spaces to north-south and east-west direction. As the plot area is a circle there are empty spaces in the corners of square shaped subplot area. Please, try again!
+
+### Response 85 (summary)
+- Corrected script to use square ±5° domain instead of circular 600 km mask.
+- Added proper x-axis (Longitude) and y-axis (Latitude) labels and ticks to all subplots.
+- Set equal aspect ratio and explicit xlim/ylim to ensure square subplot geometry fits the ±5° domain perfectly with no empty corners.
+- Improved colormap scaling (90th percentile vs 95th for better contrast).
+- Enhanced white line styling for 600 km circle overlay (increased visibility).
+- Regenerated output: `plots/geopotential_anomalies_comparison.png` (316 KB, much richer visualization).
+- Figure now displays full ±5° square domain with proper axes and no unused corner space.
