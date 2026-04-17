@@ -183,7 +183,7 @@ def plot_geopotential_comparison():
         ('2024-10-08 06:00', 'Extratropical Stage'),
     ]
     
-    fig, axes = plt.subplots(1, 3, figsize=(15, 4.5))
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5.5))
     fig.suptitle('900-600 hPa Geopotential Height Difference Anomalies', fontsize=14, fontweight='bold')
     
     _, _, track_ds = load_track_and_position(timestamps[0][0])
@@ -252,9 +252,9 @@ def plot_geopotential_comparison():
                 head_width=0.3, head_length=0.25, fc='white', ec='white', linewidth=2.5, zorder=100)
         
         # Perpendicular dashed line (left-right separation for B calculation)
-        # Perpendicular to motion direction
-        perp_dlon = dlat_vel
-        perp_dlat = -dlon_vel
+        # Perpendicular to motion direction (90° counterclockwise rotation)
+        perp_dlon = -dlat_vel
+        perp_dlat = dlon_vel
         perp_length_deg = 500.0 / 111.0
         ax.plot([lon_center - perp_dlon * perp_length_deg, lon_center + perp_dlon * perp_length_deg],
                [lat_center - perp_dlat * perp_length_deg, lat_center + perp_dlat * perp_length_deg],
@@ -287,7 +287,7 @@ def plot_geopotential_comparison():
         cf_list.append(cf)
     
     # Single colorbar
-    cbar_ax = fig.add_axes([0.88, 0.18, 0.015, 0.6])
+    cbar_ax = fig.add_axes([0.88, 0.22, 0.015, 0.55])
     cbar = plt.colorbar(cf_list[0], cax=cbar_ax, orientation='vertical')
     cbar.set_label('Anomaly (m)', fontsize=11, fontweight='bold')
     
@@ -306,7 +306,7 @@ def plot_geopotential_comparison():
     fig.legend(handles=legend_elements, loc='lower center', ncol=5, fontsize=9, 
               bbox_to_anchor=(0.5, -0.12))
     
-    plt.subplots_adjust(wspace=0.15, hspace=0.3, left=0.06, right=0.87, bottom=0.18, top=0.93)
+    plt.subplots_adjust(wspace=0.15, hspace=0.3, left=0.06, right=0.87, bottom=0.20, top=0.88)
     
     outfile = '/users/jfkarhu/Numlab/hurricane_kirk/plots/geopotential_anomalies_comparison.png'
     plt.savefig(outfile, dpi=150)
