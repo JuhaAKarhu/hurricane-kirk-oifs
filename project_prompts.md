@@ -217,3 +217,15 @@ Make the polygon visible in the plot by colouring the polygon are with c. 85 % t
 ## 2026-04-16
 
 78. "Read /users/jfkarhu/Numlab/hurricane_kirk/README.md to know what the project is about."
+
+79. "What is the horizontal scale over which we measure asymmetry parameter B in our analysis!?"
+
+## 2026-04-17
+
+80. "Read /users/jfkarhu/Numlab/hurricane_kirk/GIT_HPC_WORKFLOW.md, /users/jfkarhu/Numlab/hurricane_kirk/project_prompts_and_responses.md, /users/jfkarhu/Numlab/hurricane_kirk/README.md to get the status of the project!"
+
+81. "Are you stuck?"
+
+82. "Yes, please! [provide status summary of last interrupted session]"
+
+83. "Stage and commit!"

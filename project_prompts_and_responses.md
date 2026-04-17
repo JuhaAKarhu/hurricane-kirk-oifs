@@ -824,3 +824,41 @@ Read /users/jfkarhu/Numlab/hurricane_kirk/README.md to know what the project is 
 ### Response 78 (summary)
 - Read `README.md` and summarized the project focus, data context, run workflow, and current validated outputs.
 - Confirmed the repository is a fixed-data Mahti reproducibility workflow for Hurricane Kirk OIFS SST-perturbation experiments with Hart CPS as the core diagnostic.
+
+### Prompt 79
+What is the horizontal scale over which we measure asymmetry parameter B in our analysis!?
+
+### Response 79 (summary)
+- Confirmed from both project documentation and the Ribberink CPS implementation used by this repository that B is evaluated within a 500 km radius around the storm center.
+
+## 2026-04-17
+
+### Prompt 80
+Read /users/jfkarhu/Numlab/hurricane_kirk/GIT_HPC_WORKFLOW.md, /users/jfkarhu/Numlab/hurricane_kirk/project_prompts_and_responses.md, /users/jfkarhu/Numlab/hurricane_kirk/README.md to get the status of the project!
+
+### Response 80 (summary)
+- Read all three status documents to assess project completion state and session handoff context.
+- Confirmed project focuses on Hurricane Kirk OIFS multi-run analysis with Hart CPS as primary diagnostic, supported by track/wind-radius/core-radius analyses.
+- Identified that Apr 16 was interrupted during legend repositioning in ETT plotting script; full-period ETT figure was generated successfully but uncommitted.
+
+### Prompt 81
+Are you stuck?
+
+### Response 81 (summary)
+- Clarified that not stuck, pausing only to verify status from git and file state before providing clean summary.
+
+### Prompt 82
+Yes, please! [provide status summary of last interrupted session]
+
+### Response 82 (summary)
+- Verified working tree state: `plots/ett_start_timing_fullperiod.png` exists (untracked), `scripts/run_ett_timing_analysis.py` modified with legend reposition, prompt logs updated.
+- Confirmed last commit was Apr 16 (`80d543c`) containing README and prompt log updates.
+- Clarified that legend repositioning + full-period ETT output are safe in working tree; session interrupt occurred before commit.
+
+### Prompt 83
+Stage and commit!
+
+### Response 83 (summary)
+- Updated both reproducibility log files with session Apr 17 prompts (80–83) and response summaries.
+- Staged modified plot script, untracked full-period ETT figure, and updated prompt logs.
+- Committed all changes with message: "Session Apr 17: ETT full-period plot, legend reposition, session status recovery."

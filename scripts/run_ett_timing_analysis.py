@@ -200,6 +200,47 @@ def main():
     fig.savefig(fig_path, dpi=160)
     print(f'Saved: {fig_path}')
 
+    # Generate additional full-period plot (no zoom).
+    fig_full, ax = plt.subplots(1, 1, figsize=(10, 5))
+
+    for run_name, data in run_data.items():
+        c = colors.get(run_name, None)
+        ax.plot(
+            data['times'],
+            data['b_smooth'],
+            color=c,
+            lw=2,
+            label=run_name,
+            alpha=0.95,
+        )
+
+        # Mark first threshold crossing for timing emphasis.
+        if pd.notna(data['et_start']):
+            i0 = int(np.where(pd.to_datetime(data['times']) == data['et_start'])[0][0])
+            ax.scatter(
+                data['times'][i0],
+                data['b_smooth'][i0],
+                color=c,
+                s=35,
+                zorder=5,
+            )
+            ax.axvline(data['times'][i0], color=c, lw=1, ls=':')
+
+    ax.axhline(threshold, color='k', lw=1.0)
+    ax.grid(axis='x', alpha=0.3)
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%b %d %HZ'))
+    ax.tick_params(axis='x', rotation=45)
+    ax.set_ylabel('B (m)')
+    ax.set_title('600-900 hPa asymmetry (full simulation period)', fontsize=12)
+    ax.legend(loc='upper left')
+
+    fig_full.suptitle('Hurricane Kirk 2024: ETT Start Timing Across Simulations', fontsize=13)
+    fig_full.tight_layout()
+
+    fig_path_full = os.path.join(_ROOT, 'plots/ett_start_timing_fullperiod.png')
+    fig_full.savefig(fig_path_full, dpi=160)
+    print(f'Saved: {fig_path_full}')
+
 
 if __name__ == '__main__':
     main()
