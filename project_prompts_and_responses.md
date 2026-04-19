@@ -1010,3 +1010,91 @@ Check /users/jfkarhu/Numlab/hurricane_kirk/.project_setup.sh
   - shebang `#!/bin/bash`
   - module command `module load git 2>/dev/null`
 - Confirmed sourcing this file makes git available in the environment and resolves the earlier commit/push blocker.
+
+## 2026-04-19
+
+### Prompt 97
+Read /users/jfkarhu/Numlab/hurricane_kirk/GIT_HPC_WORKFLOW.md /users/jfkarhu/Numlab/hurricane_kirk/project_prompts_and_responses.md /users/jfkarhu/Numlab/hurricane_kirk/README.md /users/jfkarhu/Numlab/hurricane_kirk/.project_setup.sh to get the your instructions and the current status of the project!
+
+### Response 97 (summary)
+- Read all requested files and summarized current project status.
+- Confirmed CPS/track/wind-radius pipeline completion state and active reproducibility workflow requirements.
+
+### Prompt 98
+I need to modify and make several alternative versions of /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_cps.png -plot.
+
+### Response 98 (summary)
+- Reviewed `scripts/run_cps_analysis.py` and identified direct plotting points for requested edits.
+- Implemented initial axis swap and B-threshold reference-line changes in the main CPS plotting script.
+- Added a variants generator script (`scripts/generate_cps_variants.py`) and produced multiple alternative CPS images.
+
+### Prompt 99
+Let's make first the following two changes:1. Swap the axis.
+2. Draw the B-line, not through 0, but 10 to denote the ETT start time
+
+### Response 99 (summary)
+- Applied the requested swap so CPS plots use `x = -V_T` and `y = B`.
+- Replaced the `B = 0` guide with the ETT threshold line at `B = 10`.
+- Updated annotation and ETT marker coordinates to match swapped axes.
+
+### Prompt 100
+The upper CPS plots are not needed, discard them. Also in the Lower CPS title it says (600 - 900). Both the asymmetry parmeter and the thermal wind should be based on 900 hPa - 600 hPa difference, not 600 - 900! Please check whether there is need to corrct calculation, or is this justa a notation error!
+
+### Response 100 (summary)
+- Verified Hart lower-layer calculation in `ribberink_code/hurricane_functions.py` and call sites: implementation follows the established Ribberink convention and does not require formula changes.
+- Treated the layer-order wording as a notation issue and updated labels to `900–600 hPa`.
+- Removed upper CPS panels from the main script and variant generator so outputs are now lower-CPS only.
+
+### Prompt 101
+The asymmetry values of the runs in /users/jfkarhu/Numlab/hurricane_kirk/plots/ett_start_timing.png and the other plots with B values do not match. Double check both calculations!
+
+### Response 101 (summary)
+- Found the mismatch source: CPS plotting scripts were using upper-layer smoothed asymmetry (`B_upper_c`) while plotting lower-layer thermal wind (`VT_lower_c`).
+- Patched `scripts/run_cps_analysis.py` and `scripts/generate_cps_variants.py` to use lower-layer smoothed asymmetry (`B_lower_c`) consistently for all lower-CPS plots.
+- Kept Hart calculation method unchanged (still Ribberink-consistent 900–600 hPa layer via `hart(zg_600, zg_900, ...)`) and updated ETT script wording to `900-600 hPa` for notation consistency.
+- Re-ran `scripts/run_ett_timing_analysis.py`, `scripts/run_cps_analysis.py`, and `scripts/generate_cps_variants.py` and numerically verified exact equality between CPS lower-layer `B_c` and ETT `B_smooth` time series for all runs (max absolute difference = 0.0).
+
+### Prompt 102
+Make two versions of kirk_cps_v3_grid_per_run.png -plot: keep the present version, but make another where the axises are fixed (the same in all runs), delete the legend boxes as unnecessary, annotate every 12 UTC timestep with date!
+
+### Response 102 (summary)
+- Added a new fixed-axes variant generator in `scripts/generate_cps_variants.py` while keeping the existing v3 plot unchanged.
+- New output `plots/kirk_cps_v3b_fixed_axes.png` uses common axis limits across all four run panels, no legend boxes, and 12UTC timestamp annotations.
+- Regenerated variants and verified both files are present: original `kirk_cps_v3_grid_per_run.png` and new `kirk_cps_v3b_fixed_axes.png`.
+
+### Prompt 103
+Keeping the updated plot otherwise as it is, please, add the extra (big) markers for ETT start time in each subplot:
+baserun: Oct 6 06UTC​
++3K and +6K runs: Oct 6 15UTC​
+-3K run: Oct 7 09UTC
+
+### Response 103 (summary)
+- Updated only `generate_variant_3b_fixed_axes()` in `scripts/generate_cps_variants.py` to add explicit large ETT markers at the requested run-specific timestamps.
+- Kept all other v3b settings unchanged (fixed shared axes, no legends, reduced timestep plotting, 12UTC-only labels).
+- Re-ran the variants generator and verified `plots/kirk_cps_v3b_fixed_axes.png` was updated successfully.
+
+### Prompt 104
+Revert to the previous version (No ETT start time markers) of the plot but change the title to "Hurricane Kirk 2024 – Cyclone Phase Space".
+
+### Response 104 (summary)
+- Reverted `generate_variant_3b_fixed_axes()` in `scripts/generate_cps_variants.py` to remove the added large ETT markers.
+- Updated the v3b figure title to `Hurricane Kirk 2024 – Cyclone Phase Space`.
+- Re-ran the variants generator and confirmed refreshed output at `plots/kirk_cps_v3b_fixed_axes.png`.
+
+### Prompt 105
+These plots are not necessary:
+/users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_cps_v1_swapped_ett.png
+/users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_cps_v2_original_axes.png
+/users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_cps_v3_grid_per_run.png
+/users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_cps_v4_marked_runs.png
+Please remove them and the code for plotting them from the scripts and notebooks!
+
+### Response 105 (summary)
+- Removed generation code for the four unneeded CPS variants from `scripts/generate_cps_variants.py` (deleted variant functions and corresponding calls).
+- Kept only `kirk_cps_v3b_fixed_axes.png` generation in the variants script and revalidated execution.
+- Deleted files:
+  - `plots/kirk_cps_v1_swapped_ett.png`
+  - `plots/kirk_cps_v2_original_axes.png`
+  - `plots/kirk_cps_v3_grid_per_run.png`
+  - `plots/kirk_cps_v4_marked_runs.png`
+- Verified no remaining references to these files in `scripts/` or `notebooks/`.

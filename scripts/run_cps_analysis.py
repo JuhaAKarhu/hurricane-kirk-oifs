@@ -77,6 +77,8 @@ for run_name, run_dir in RUNS.items():
         B_u, VT_u, B_c_u, VT_c_u, halves_u = hf.hart(
             zg_300, zg_600, track_ds, model='OPER', hemisphere='North', N=2
         )
+        # Lower-layer CPS uses the 900-600 hPa layer thickness asymmetry,
+        # implemented with (600, 900) inputs to match the Ribberink hart() convention.
         B_l, VT_l, B_c_l, VT_c_l, halves_l = hf.hart(
             zg_600, zg_900, track_ds, model='OPER', hemisphere='North', N=2
         )
@@ -88,13 +90,19 @@ for run_name, run_dir in RUNS.items():
         continue
 
     cps_results[run_name] = {
-        'B': B_u, 'B_c': B_c_u,
-        'VT_upper': VT_u, 'VT_upper_c': VT_c_u,
-        'VT_lower': VT_l, 'VT_lower_c': VT_c_l,
-        'times': track_ds.time.values[:-1]  # hart returns n-1 values
+        'B_upper': B_u,
+        'B_upper_c': B_c_u,
+        'B_lower': B_l,
+        'B_lower_c': B_c_l,
+        'VT_upper': VT_u,
+        'VT_upper_c': VT_c_u,
+        'VT_lower': VT_l,
+        'VT_lower_c': VT_c_l,
+        'times': track_ds.time.values[:-1],  # hart returns n-1 values
     }
-    print(f'  B_u range: [{np.nanmin(B_u):.1f}, {np.nanmax(B_u):.1f}], NaN count: {np.isnan(B_u).sum()}/{len(B_u)}')
-    print(f'  VT_u range: [{np.nanmin(VT_u):.1f}, {np.nanmax(VT_u):.1f}], NaN count: {np.isnan(VT_u).sum()}/{len(VT_u)}')
+    print(f'  B_upper range: [{np.nanmin(B_u):.1f}, {np.nanmax(B_u):.1f}], NaN count: {np.isnan(B_u).sum()}/{len(B_u)}')
+    print(f'  B_lower range: [{np.nanmin(B_l):.1f}, {np.nanmax(B_l):.1f}], NaN count: {np.isnan(B_l).sum()}/{len(B_l)}')
+    print(f'  VT_lower range: [{np.nanmin(VT_l):.1f}, {np.nanmax(VT_l):.1f}], NaN count: {np.isnan(VT_l).sum()}/{len(VT_l)}')
 
 # Match color coding used by scripts/plot_tracks_comparison.py
 colors = {
@@ -105,91 +113,88 @@ colors = {
 }
 ett_start_times = load_ett_start_times(_ROOT)
 
-fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+fig, ax = plt.subplots(1, 1, figsize=(7.5, 6))
 
-for ax_idx, (ax, vt_key, title) in enumerate([
-    (axes[0], 'VT_upper_c', 'Upper CPS (300–600 hPa)'),
-    (axes[1], 'VT_lower_c', 'Lower CPS (600–900 hPa)'),
-]):
-    plot_count = 0
-    for run_name, res in cps_results.items():
-        b_vals = res['B_c']
-        vt_vals = res[vt_key]
-        times = pd.to_datetime(res['times'])
-        # Only plot non-NaN points
-        valid_mask = ~(np.isnan(b_vals) | np.isnan(vt_vals))
-        if valid_mask.sum() > 0:
-            b_plot = b_vals[valid_mask]
-            vt_plot = vt_vals[valid_mask]
-            t_plot = times[valid_mask]
+vt_key = 'VT_lower_c'
+title = 'Lower CPS (900–600 hPa)'
+plot_count = 0
+for run_name, res in cps_results.items():
+    b_vals = res['B_lower_c']
+    vt_vals = res[vt_key]
+    times = pd.to_datetime(res['times'])
+    # Only plot non-NaN points
+    valid_mask = ~(np.isnan(b_vals) | np.isnan(vt_vals))
+    if valid_mask.sum() > 0:
+        b_plot = b_vals[valid_mask]
+        vt_plot = vt_vals[valid_mask]
+        t_plot = times[valid_mask]
 
-            ax.scatter(
-                b_plot,
-                vt_plot,
-                c=colors.get(run_name, 'k'),
-                label=run_name,
-                s=30,
-                alpha=0.8,
-                zorder=3,
-            )
-            ax.plot(
-                b_plot,
-                vt_plot,
-                color=colors.get(run_name, 'k'),
-                alpha=0.4,
-                lw=1,
-            )
+        ax.scatter(
+            vt_plot,
+            b_plot,
+            c=colors.get(run_name, 'k'),
+            label=run_name,
+            s=30,
+            alpha=0.8,
+            zorder=3,
+        )
+        ax.plot(
+            vt_plot,
+            b_plot,
+            color=colors.get(run_name, 'k'),
+            alpha=0.4,
+            lw=1,
+        )
 
-            # Annotate 00UTC points with date-time text.
-            for b_pt, vt_pt, t_pt in zip(b_plot, vt_plot, t_plot):
-                if pd.Timestamp(t_pt).hour == 0:
-                    ax.annotate(
-                        pd.Timestamp(t_pt).strftime('%m-%d %HZ'),
-                        xy=(b_pt, vt_pt),
-                        xytext=(4, 4),
-                        textcoords='offset points',
-                        fontsize=7,
-                        color=colors.get(run_name, 'k'),
-                        alpha=0.9,
-                    )
-
-            # Mark ET-transition start time with a larger same-color marker.
-            et_t = ett_start_times.get(run_name)
-            if et_t is not None and len(t_plot) > 0:
-                t_ns = t_plot.to_numpy(dtype='datetime64[ns]')
-                et_ns = np.datetime64(et_t.to_datetime64(), 'ns')
-                idx_et = int(np.abs(t_ns - et_ns).argmin())
-                ax.scatter(
-                    b_plot[idx_et],
-                    vt_plot[idx_et],
-                    s=170,
-                    marker='o',
-                    c=colors.get(run_name, 'k'),
-                    edgecolors='k',
-                    linewidths=0.8,
-                    zorder=6,
+        # Annotate 00UTC points with date-time text.
+        for b_pt, vt_pt, t_pt in zip(b_plot, vt_plot, t_plot):
+            if pd.Timestamp(t_pt).hour == 0:
+                ax.annotate(
+                    pd.Timestamp(t_pt).strftime('%m-%d %HZ'),
+                    xy=(vt_pt, b_pt),
+                    xytext=(4, 4),
+                    textcoords='offset points',
+                    fontsize=7,
+                    color=colors.get(run_name, 'k'),
+                    alpha=0.9,
                 )
-            plot_count += valid_mask.sum()
-        else:
-            print(f'WARNING: No valid CPS points for {run_name} on {vt_key}')
 
-    print(f'\nPlotted {plot_count} total points on {title}')
+        # Mark ET-transition start time with a larger same-color marker.
+        et_t = ett_start_times.get(run_name)
+        if et_t is not None and len(t_plot) > 0:
+            t_ns = t_plot.to_numpy(dtype='datetime64[ns]')
+            et_ns = np.datetime64(et_t.to_datetime64(), 'ns')
+            idx_et = int(np.abs(t_ns - et_ns).argmin())
+            ax.scatter(
+                vt_plot[idx_et],
+                b_plot[idx_et],
+                s=170,
+                marker='o',
+                c=colors.get(run_name, 'k'),
+                edgecolors='k',
+                linewidths=0.8,
+                zorder=6,
+            )
+        plot_count += valid_mask.sum()
+    else:
+        print(f'WARNING: No valid CPS points for {run_name} on {vt_key}')
 
-    ax.axhline(0, color='k', lw=0.8, ls='--')
-    ax.axvline(0, color='k', lw=0.8, ls='--')
-    ax.axhline(25, color='gray', lw=0.5, ls=':')
-    ax.set_xlabel('B – Thermal Asymmetry (m)')
-    ax.set_ylabel('−V_T (Thermal Wind, m)')
-    ax.set_title(title)
-    if ax_idx == 0:
-        ax.legend()
-    ax.grid(True, alpha=0.3)
+print(f'\nPlotted {plot_count} total points on {title}')
 
-    # Annotate quadrants
-    ax.text(0.02, 0.98, 'Warm-core\n(tropical)', transform=ax.transAxes,
-            ha='left', va='top', fontsize=8, color='red')
-    ax.text(0.98, 0.98, 'Cold-core\n(extratropical)', transform=ax.transAxes,
-            ha='right', va='top', fontsize=8, color='blue')
+ax.axvline(0, color='k', lw=0.8, ls='--')
+ax.axhline(10, color='red', lw=1.2, ls='--', label='ETT threshold (B=10m)')
+ax.axvline(25, color='gray', lw=0.5, ls=':')
+ax.set_xlabel('−V_T (Thermal Wind, m)')
+ax.set_ylabel('B – Thermal Asymmetry (m)')
+ax.set_title(title)
+ax.legend()
+ax.grid(True, alpha=0.3)
+
+# Annotate quadrants
+ax.text(0.02, 0.98, 'Warm-core\n(tropical)', transform=ax.transAxes,
+        ha='left', va='top', fontsize=8, color='red')
+ax.text(0.98, 0.98, 'Cold-core\n(extratropical)', transform=ax.transAxes,
+        ha='right', va='top', fontsize=8, color='blue')
 
 plt.suptitle('Hurricane Kirk 2024 – Cyclone Phase Space', fontsize=13)
 plt.tight_layout()

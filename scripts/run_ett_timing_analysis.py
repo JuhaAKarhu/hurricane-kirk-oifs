@@ -42,7 +42,7 @@ def first_crossing_time(times, values, threshold=10.0):
 
 
 def compute_lower_b_timeseries(track_ds, run_dir, run_name, smooth_n=2):
-    """Compute lower-layer CPS asymmetry B (600-900 hPa) for one run."""
+    """Compute lower-layer CPS asymmetry B for the 900-600 hPa layer."""
     oifs_run = OIFSRun(run_dir)
     zg_ds = oifs_run.get_geopotential_height(
         levels=(600, 900),
@@ -187,7 +187,7 @@ def main():
         ax.set_ylabel('B (m)')
 
         if ax_idx == 0:
-            ax.set_title('(a) 600-900 hPa asymmetry (full period)')
+            ax.set_title('(a) 900-600 hPa asymmetry (full period)')
             ax.legend(loc='best')
         else:
             ax.set_title('(b) ETT-start timing window')
@@ -231,7 +231,7 @@ def main():
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%b %d %HZ'))
     ax.tick_params(axis='x', rotation=45)
     ax.set_ylabel('B (m)')
-    ax.set_title('600-900 hPa asymmetry (full simulation period)', fontsize=12)
+    ax.set_title('900-600 hPa asymmetry (full simulation period)', fontsize=12)
     ax.legend(loc='upper left')
 
     fig_full.suptitle('Hurricane Kirk 2024: ETT Start Timing Across Simulations', fontsize=13)

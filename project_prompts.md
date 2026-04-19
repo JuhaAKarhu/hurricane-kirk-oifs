@@ -255,3 +255,31 @@ Make the polygon visible in the plot by colouring the polygon are with c. 85 % t
 95. "Please commit all changes and push!"
 
 96. "Check /users/jfkarhu/Numlab/hurricane_kirk/.project_setup.sh"
+
+## 2026-04-19
+
+97. "Read /users/jfkarhu/Numlab/hurricane_kirk/GIT_HPC_WORKFLOW.md /users/jfkarhu/Numlab/hurricane_kirk/project_prompts_and_responses.md /users/jfkarhu/Numlab/hurricane_kirk/README.md /users/jfkarhu/Numlab/hurricane_kirk/.project_setup.sh to get the your instructions and the current status of the project!"
+
+98. "I need to modify and make several alternative versions of /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_cps.png -plot."
+
+99. "Let's make first the following two changes:1. Swap the axis. 2. Draw the B-line, not through 0, but 10 to denote the ETT start time"
+
+100. "The upper CPS plots are not needed, discard them. Also in the Lower CPS title it says (600 - 900). Both the asymmetry parmeter and the thermal wind should be based on 900 hPa - 600 hPa difference, not 600 - 900! Please check whether there is need to corrct calculation, or is this justa a notation error!"
+
+101. "The asymmetry values of the runs in /users/jfkarhu/Numlab/hurricane_kirk/plots/ett_start_timing.png and the other plots with B values do not match. Double check both calculations!"
+
+102. "Make two versions of kirk_cps_v3_grid_per_run.png -plot: keep the present version, but make another where the axises are fixed (the same in all runs), delete the legend boxes as unnecessary, annotate every 12 UTC timestep with date!"
+
+103. "Keeping the updated plot otherwise as it is, please, add the extra (big) markers for ETT start time in each subplot:
+baserun: Oct 6 06UTC​
++3K and +6K runs: Oct 6 15UTC​
+-3K run: Oct 7 09UTC"
+
+104. "Revert to the previous version (No ETT start time markers) of the plot but change the title to \"Hurricane Kirk 2024 – Cyclone Phase Space\"."
+
+105. "These plots are not necessary:
+/users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_cps_v1_swapped_ett.png
+/users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_cps_v2_original_axes.png
+/users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_cps_v3_grid_per_run.png
+/users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_cps_v4_marked_runs.png
+Please remove them and the code for plotting them from the scripts and notebooks!"
