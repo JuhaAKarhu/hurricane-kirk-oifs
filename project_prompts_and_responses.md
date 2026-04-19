@@ -1098,3 +1098,102 @@ Please remove them and the code for plotting them from the scripts and notebooks
   - `plots/kirk_cps_v3_grid_per_run.png`
   - `plots/kirk_cps_v4_marked_runs.png`
 - Verified no remaining references to these files in `scripts/` or `notebooks/`.
+
+---
+
+## 2026-04-19 (continued)
+
+### Prompt 106
+"I am wondering what might be behind the fact that Both thermal wind and asymmetry parameter are 0 at the first timestep?"
+
+### Response 106 (summary)
+- Diagnosed root cause: in `ribberink_code/hurricane_functions.py` the `hart()` function initialises B and VT_calc arrays with `np.zeros`, but the calculation loop starts at `i=1` (not `i=0`), so index 0 is never computed and remains 0.
+- Explained why: both B (thermal asymmetry) and VT (thermal wind) require knowing the storm's direction of travel, computed from successive track positions. Without two positions the left/right hemispheres cannot be defined, so the first timestep is intentionally skipped.
+
+### Prompt 107
+"I believe you answered the question for asymmetry parameter. What about thermal wind?"
+
+### Response 107 (summary)
+- Confirmed VT has the exact same root cause: `phi_u` and `phi_l` (geopotential height ranges in left/right halves) also depend on the directional hemisphere split, and the loop likewise starts at `i=1`, leaving `VT_calc[0] = 0`.
+
+### Prompt 108
+"Next task is to produce a new plot similar to /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_mslp_comparison.png but for max sustained surface (10 m) wind speed of the cyclone in each simulation."
+
+### Response 108 (summary)
+- Created `scripts/plot_wind_speed_comparison.py` following the structure of the MSLP comparison cell in `notebooks/05_multi_run_comparison.ipynb`.
+- Identified that `hf.magnitude(wind_ds['u10m'], wind_ds['v10m'])` and the Gaussian grid restructuring pattern from `notebooks/04_wind_radius.ipynb` are the correct tools.
+
+### Prompt 109
+"For plot /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_R17.png wind speed was used. Check that part of the codebase to see if we can utilize data/code from there!"
+
+### Response 109 (summary)
+- Audited `notebooks/04_wind_radius.ipynb` (cell VSC-93d44e9d): confirmed it uses `ws = hf.magnitude(wind_ds['u10m'], wind_ds['v10m'])` for full-grid wind speed.
+- Updated `plot_wind_speed_comparison.py` to import and use `hf.magnitude`, and to handle OIFS reduced Gaussian grids by restructuring via `.set_index(values=['lat','lon']).unstack()`.
+- Aligned color scheme with wind radius/R17 plots: `{'-3K': '#1f77b4', 'baserun': '#2ca02c', '+3K': '#ff7f0e', '+6K': '#d62728'}`.
+
+### Prompt 110
+"Is it relevant to ask, how far from the center (min mslp) the code looks for max sustained wind speed?"
+
+### Response 110 (summary)
+- Confirmed relevance: original code extracted wind at exactly the pressure-minimum grid point, which underestimates the true maximum (wind peak is at RMW, not the eye centre).
+- Proposed using max wind within a search radius around the storm centre instead.
+
+### Prompt 111
+"Yes, and use 500 km radius!"
+
+### Response 111 (summary)
+- Rewrote `compute_wind_speed_at_center` → `compute_max_wind_speed_within_radius(radius_km=500)` in `scripts/plot_wind_speed_comparison.py`.
+- Method: bounding box pre-filter (±~5.5°) then exact haversine distance ≤ 500 km (via `hf.haversine`), then `ws.max()` over all qualifying grid points.
+
+### Prompt 112
+"Continue the task!"
+
+### Response 112 (summary)
+- Executed `scripts/plot_wind_speed_comparison.py` successfully.
+- Output: `plots/kirk_wind_speed_comparison.png` (182K, 2026-04-19 19:50).
+- Initial plot showed no data due to longitude convention mismatch (OIFS grid: 0–360°, track: −180–180°).
+- Diagnosed via bounding box test (returned 0 points at storm center −48.0° lon).
+- Fixed by converting lon_c to grid convention before bounding box filter.
+- Re-ran and confirmed all 4 runs computed with realistic values: −3K (19.4–32.6 m/s), baserun (24.7–36.0 m/s), +3K (28.2–48.2 m/s), +6K (29.4–70.1 m/s).
+- Results consistent with MSLP sensitivity (warmer SST → higher wind).
+
+### Prompt 113
+"What does sustained mean here?"
+
+### Response 113 (summary)
+- Clarified that current code computes instantaneous max within 500 km (no explicit time-averaging applied).
+- Model 3-hour snapshot provides implicit smoothing, but calling this "sustained" was technically misleading.
+- Recommended label update to "Peak" or "Maximum" instead of "Sustained".
+
+### Prompt 114
+"Use 'Peak 10 m Wind Speed Within 500 km Radius'."
+
+### Response 114 (summary)
+- Updated both y-axis label and plot title in `scripts/plot_wind_speed_comparison.py` to:
+  - Title: "Hurricane Kirk 2024 – Peak 10 m Wind Speed Within 500 km Radius"
+  - Y-axis: "Peak 10 m Wind Speed (m s⁻¹)"
+- Re-executed script and regenerated `plots/kirk_wind_speed_comparison.png` with updated labels.
+
+### Prompt 115
+"For y-axis title though, use 'Wind Speed' only instead of long plot title wording!"
+
+### Response 115 (summary)
+- Updated y-axis label to simplified form: "Wind Speed (m s⁻¹)".
+- Kept full descriptive title: "Hurricane Kirk 2024 – Peak 10 m Wind Speed Within 500 km Radius".
+- Re-executed script and regenerated final version of `plots/kirk_wind_speed_comparison.png`.
+
+### Prompt 116
+"Commit changes and push!"
+
+### Response 116 (partial)
+- Prepared to update logs and commit the wind speed comparison script and plot.
+
+### Prompt 117
+"If you are trying to load and evaluate data files, interrupt. Modify the relevant instruction files to reflect this approach: skip data files evaluation, commit and push!"
+
+### Response 117 (summary)
+- Created `.github/copilot-instructions.md` (workspace-level instruction file) to explicitly skip data file evaluation during exploration/setup phases.
+- Documented the rationale (performance, quota warnings) and exceptions (user-explicit requests).
+- Included project conventions for reproducibility logs and terminal environment setup.
+- Updated both `project_prompts.md` and `project_prompts_and_responses.md` with prompts/responses 113–117.
+- Ready for final commit and push.

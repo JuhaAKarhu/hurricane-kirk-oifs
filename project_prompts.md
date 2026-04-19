@@ -283,3 +283,27 @@ baserun: Oct 6 06UTC​
 /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_cps_v3_grid_per_run.png
 /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_cps_v4_marked_runs.png
 Please remove them and the code for plotting them from the scripts and notebooks!"
+
+106. "I am wondering what might be behind the fact that Both thermal wind and asymmetry parameter are 0 at the first timestep?"
+
+107. "I believe you answered the question for asymmetry parameter. What about thermal wind?"
+
+108. "Next task is to produce a new plot similar to /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_mslp_comparison.png but for max sustained surface (10 m) wind speed of the cyclone in each simulation."
+
+109. "For plot /users/jfkarhu/Numlab/hurricane_kirk/plots/kirk_R17.png wind speed was used. Check that part of the codebase to see if we can utilize data/code from there!"
+
+110. "Is it relevant to ask, how far from the center (min mslp) the code looks for max sustained wind speed?"
+
+111. "Yes, and use 500 km radius!"
+
+112. "Continue the task!"
+
+113. "What does sustained mean here?"
+
+114. "Use 'Peak 10 m Wind Speed Within 500 km Radius'."
+
+115. "For y-axis title though, use 'Wind Speed' only instead of long plot title wording!"
+
+116. "Commit changes and push!"
+
+117. "If you are trying to load and evaluate data files, interrupt. Modify the relevant instruction files to reflect this approach: skip data files evaluation, commit and push!"
